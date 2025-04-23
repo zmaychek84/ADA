@@ -37,9 +37,12 @@ VERBOSE = args.verbose
 # --------------------------------------------------------------------
 REDFISH_OEM = "redfish/v1/Oem/Supermicro/MI300X"
 REDFISH_MANAGER_BMC = "redfish/v1/Managers/1"
+REDFISH_SYSTEM_BMC = "redfish/v1/Systems/1"
 REDFISH_UBB_TASKS = "redfish/v1/Oem/Supermicro/MI300X/TaskService/Tasks"
 PORT = 443
 PROTOCOL = "https"
+POWER_ON = {"Action": "Reset", "ResetType": "On"}
+POWER_OFF = {"Action": "Reset", "ResetType": "ForceOff"}
 
 # --------------------------------------------------------------------
 # Helper Functions
@@ -77,6 +80,7 @@ def prompt_for_bmc_credentials():
 
     while not bmc_username:
         bmc_username = input("Enter BMC Username: ")
+
     while not bmc_password:
         if DEBUG:
             bmc_password = input("Enter BMC Password: ")
@@ -170,10 +174,13 @@ def authenticate(bmc_ip, bmc_username, bmc_password):
         response = http_request_with_retries(
             "get", url, auth=(bmc_username, bmc_password)
         )
+
         if not response.ok:
             log(f"Authentication check failed. HTTP code: {response.status_code}")
             return False
+
         data = response.json()
+
         if "error" in data:
             # Some BMCs return an 'error' key if authentication fails
             return False
@@ -184,93 +191,383 @@ def authenticate(bmc_ip, bmc_username, bmc_password):
     return True
 
 
+def checkUbb(bmc_ip, bmc_username, bmc_password, max_attempts=2):
+    """
+    Check if we are able to connect to the UBB or if there is a sync issue
+    """
+    attempts = 0
+    url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB"
+    while attempts < max_attempts:
+        try:
+            response = http_request_with_retries(
+                "get", url, auth=(bmc_username, bmc_password)
+            )
+
+            if not response.ok:
+                log(
+                    f"Unable to establish connection to the UBB. HTTP code: {response.status_code}"
+                )
+                log(f"Power cycling system before retry")
+                systemPowerCycle(bmc_ip, bmc_username, bmc_password)
+                attempts += 1
+                continue
+            data = response.json()
+
+            if "error" in data:
+                log(f"Error found in response.  Power cycling system before retry")
+                systemPowerCycle(bmc_ip, bmc_username, bmc_password)
+                attempts += 1
+                continue
+
+            return True
+        except Exception as e:
+            log(f"Exception while accessing UBB: {e}")
+            systemPowerCycle(bmc_ip, bmc_username, bmc_password)
+            attempts += 1
+            continue
+
+    if attempts >= max_attempts:
+        return False
+
+    return True
+
+
+def getBmcVersion(bmc_ip, bmc_username, bmc_password):
+    """
+    Get the BMC version for the system.  This code is partner specific.
+    """
+    url = f"{PROTOCOL}://{bmc_ip}:{PORT}/redfish/v1/UpdateService/FirmwareInventory/BMC"
+    try:
+        response = http_request_with_retries(
+            "get", url, auth=(bmc_username, bmc_password)
+        )
+
+        if not response.ok:
+            log(f"Unable to get BMC version.  HTTP code: {response.status_code}")
+            return False
+
+        data = response.json()
+
+        if "error" in data:
+            log(f"Unable to get BMC version. Error in response.")
+            return False
+        else:
+            # log(f"BMC version: {json.load(data)}")
+            log(f"BMC version: \"{data['Version']}\"")
+    except Exception as e:
+        log(f"Exception while reading BMC version: {e}")
+
+        if VERBOSE:
+            log(f"{data}")
+
+        return False
+
+    url = (
+        f"{PROTOCOL}://{bmc_ip}:{PORT}/redfish/v1/UpdateService/FirmwareInventory/BIOS"
+    )
+    try:
+        response = http_request_with_retries(
+            "get", url, auth=(bmc_username, bmc_password)
+        )
+
+        if not response.ok:
+            log(f"Unable to get BIOS version.  HTTP code: {response.status_code}")
+            return False
+
+        data = response.json()
+
+        if "error" in data:
+            log(f"Unable to get BIOS version. Error in response.")
+            return False
+        else:
+            log(f"BIOS version: \"{data['Version']}\"")
+    except Exception as e:
+        log(f"Exception while reading BIOS version: {e}")
+
+        if VERBOSE:
+            log(f"{data}")
+        return False
+
+    return True
+
+
+def getBkcVersion(bmc_ip, bmc_username, bmc_password):
+    """
+    Get the BKC version for the UBB assembly.  This code is partner specific.
+    """
+    url = f"{PROTOCOL}://{bmc_ip}:{PORT}/redfish/v1/UpdateService/FirmwareInventory/bundle_active"
+    try:
+        response = http_request_with_retries(
+            "get", url, auth=(bmc_username, bmc_password)
+        )
+
+        if not response.ok:
+            log(f"Unabled to get BKC version.  HTTP code: {response.status_code}")
+            return False
+        data = response.json()
+
+        if "error" in data:
+            log(f"Unabled to get BKC version.  Error in response.")
+            return False
+        else:
+            log(
+                f"UBB assembly BKC version: \"{data['Oem']['AMD']['VersionID']['ComponentDetails']}\""
+            )
+    except Exception as e:
+        log(f"Exception while reading BKC version: {e}")
+
+        if VERBOSE:
+            log(f"{data}")
+        return False
+
+    return True
+
+
+def systemPowerOn(bmc_ip, bmc_username, bmc_password):
+    """
+    Power on system using BMC Redfish, then wait for host to come up.
+    """
+    dwell = 20
+    INTERVAL = 3
+    TIMEOUT_SECONDS = 12 * 60
+
+    log("Powering system on")
+
+    reset_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_SYSTEM_BMC}/Actions/ComputerSystem.Reset"
+
+    try:
+        response = http_request_with_retries(
+            "post", reset_url, auth=(bmc_username, bmc_password), json=POWER_ON
+        )
+        check_response_success(response, "Host power on failure.")
+        task_response_text = response.text
+    except Exception as e:
+        log(f"Exception while Host power on: {e}")
+        sys.exit(1)
+
+    log(f"Waiting for {dwell} seconds to confirm power is on")
+    time.sleep(dwell)
+
+    bmc_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_SYSTEM_BMC}"
+
+    try:
+        response = http_request_with_retries(
+            "get", bmc_url, auth=(bmc_username, bmc_password)
+        )
+        check_response_success(response, "Failed to get power state.")
+        resp = response.json()
+        powerState = resp.get("PowerState", "Unknown")
+
+        if powerState != "On":
+            log(f"Failed to power on system, power state is {powerState}")
+            sys.exit(1)
+        else:
+            log(f"System is {powerState}")
+    except Exception as e:
+        log(f"Exception while powering on system: {e}")
+        sys.exit(1)
+
+    log(
+        f"Sleep for {TIMEOUT_SECONDS // 60} minutes so we can be sure BMC and SMC are ready"
+    )
+
+    remaining_time = TIMEOUT_SECONDS
+
+    while remaining_time > 0:
+        print(f"\rRemaining time: {remaining_time:>3}s", end="")
+        sys.stdout.flush()
+        time.sleep(INTERVAL)
+        remaining_time -= INTERVAL
+
+    print(f"\rRemaining time:   0s\r", end="")
+
+
+def systemPowerOff(bmc_ip, bmc_username, bmc_password):
+    """
+    Power off system using BMC Redfish.
+    Host must be up for ForceOff or GracefulShutdown to work reliably.
+    """
+    dwell = 20
+    log("Powering system off")
+
+    reset_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_SYSTEM_BMC}/Actions/ComputerSystem.Reset"
+
+    try:
+        response = http_request_with_retries(
+            "post", reset_url, auth=(bmc_username, bmc_password), json=POWER_OFF
+        )
+        check_response_success(
+            response, "Host power off failure. Please manually pull power at PDU."
+        )
+        task_response_text = response.text
+    except Exception as e:
+        log(f"Exception while Host power off: {e}.  Please manually pull power at PDU.")
+        sys.exit(1)
+
+    log(f"Waiting for {dwell} seconds to confirm power is off")
+    time.sleep(dwell)
+
+    bmc_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_SYSTEM_BMC}"
+
+    try:
+        response = http_request_with_retries(
+            "get", bmc_url, auth=(bmc_username, bmc_password)
+        )
+        check_response_success(
+            response, "Failed to get power state.  Please manually pull power at PDU."
+        )
+        resp = response.json()
+        powerState = resp.get("PowerState", "Unknown")
+        if powerState == "On":
+            log("Failed to power off system")
+            sys.exit(1)
+        else:
+            log(f"System is {powerState}")
+    except Exception as e:
+        log(f"Exception while powering off system: {e}")
+        sys.exit(1)
+
+
+def systemPowerCycle(bmc_ip, bmc_username, bmc_password):
+    """
+    Cycle the power using the BMC.
+    This implies an off-then-wait-then-on sequence.
+    """
+    dwell = 120
+    log("Initiating DC power cycle")
+    systemPowerOff(bmc_ip, bmc_username, bmc_password)
+    log(f"Dropping power for {dwell // 60} minutes")
+    time.sleep(dwell)
+    systemPowerOn(bmc_ip, bmc_username, bmc_password)
+
+
+def logsClear(bmc_ip, bmc_username, bmc_password):
+    """
+    Clear all logs on UBB.
+    """
+    log("Clearing all logs on UBB")
+
+    paths = [
+        f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/LogServices/Dump/Actions/LogService.ClearLog",
+        f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/LogServices/EventLog/Actions/LogService.ClearLog",
+        f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/LogServices/DiagLogs/Actions/LogService.ClearLog",
+    ]
+
+    for p in paths:
+        try:
+            payload = {}
+            response = http_request_with_retries(
+                "post", p, auth=(bmc_username, bmc_password), json=payload
+            )
+            check_response_success(response, "Failed to clear logs at {p}.")
+            task_response_text = response.text
+        except Exception as e:
+            log(f"Exception while clearing log data: {e}")
+            sys.exit(1)
+        time.sleep(3)
+
+
 def tasks_wait(bmc_ip, bmc_username, bmc_password):
     """
     Wait for all tasks in the TaskService to complete. Exits the script
     if any task fails or if it times out.
     """
-    TIMEOUT_SECONDS = 25 * 60  # 25 minutes
-    INTERVAL = 3
+    if REDFISH_UBB_TASKS == "none":
+        dwell = 480
+        INTERVAL = 3
+        log(f"Waiting {dwell // 60} minutes for the logs to be generated from task")
 
-    # Give the BMC a moment to register the newly-triggered tasks
-    time.sleep(5)
+        while dwell > 0:
+            print(f"\rTime remaining: {dwell:>4}s", end="")
+            time.sleep(INTERVAL)
+            dwell = dwell - INTERVAL
 
-    # Check how many tasks are have been created
-    url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_UBB_TASKS}"
-    try:
-        response = http_request_with_retries(
-            "get", url, auth=(bmc_username, bmc_password)
-        )
-        check_response_success(response, "Failed to query tasks.")
-        data = response.json()
-        tasks = data.get("Members@odata.count", 0)
-    except Exception as e:
-        log(f"Exception while querying {url} tasks: {e}")
-        sys.exit(1)
+        print(f"\rTime remaining:    0s\r", end="")
+    else:
+        TIMEOUT_SECONDS = 25 * 60  # 25 minutes
+        INTERVAL = 3
 
-    if DEBUG:
-        log(f"Tasks found: {tasks}")
+        # Give the BMC a moment to register the newly-triggered tasks
+        time.sleep(5)
 
-    # If no tasks, nothing to wait for
-    if tasks == 0:
-        return
+        # Check how many tasks are have been created
+        url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_UBB_TASKS}"
+        try:
+            response = http_request_with_retries(
+                "get", url, auth=(bmc_username, bmc_password)
+            )
+            check_response_success(response, "Failed to query tasks.")
+            data = response.json()
+            tasks = data.get("Members@odata.count", 0)
+        except Exception as e:
+            log(f"Exception while querying {url} tasks: {e}")
+            sys.exit(1)
 
-    for task_index in range(tasks):
-        newline_needed = False
-        elapsed_time = 0
+        if DEBUG:
+            log(f"Tasks found: {tasks}")
 
-        while True:
-            # Query the status of each task
-            task_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_UBB_TASKS}/{task_index}"
+        # If no tasks, nothing to wait for
+        if tasks == 0:
+            return
 
-            try:
-                response = http_request_with_retries(
-                    "get", task_url, auth=(bmc_username, bmc_password)
+        for task_index in range(tasks):
+            newline_needed = False
+            elapsed_time = 0
+
+            while True:
+                # Query the status of each task
+                task_url = (
+                    f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_UBB_TASKS}/{task_index}"
                 )
-                check_response_success(
-                    response, f"Failed to query status of task {task_index}."
-                )
-                status_data = response.json()
-                status = status_data.get("TaskState", "Unknown")
-            except Exception as e:
-                log(f"Exception while querying task {task_index}: {e}")
-                sys.exit(1)
 
-            if status == "Completed":
-                if DEBUG:
-                    print(f"\nTask {task_index} completed successfully.")
-                break
-            elif status == "Failed":
-                log(f"Task {task_index} failed.")
-                sys.exit(1)
-            elif status in ["Running", "New", "Pending"]:
-                # Show ongoing progress
-                newline_needed = True
-                print(
-                    f"\rTask {task_index} is still running, elapsed {elapsed_time}s",
-                    end="",
-                )
-                sys.stdout.flush()
-                time.sleep(INTERVAL)
-                elapsed_time += INTERVAL
-            else:
-                newline_needed = True
-                print(
-                    f"\rUnknown task status: {status}, task {task_index}, elapsed {elapsed_time}s",
-                    end="",
-                )
-                sys.stdout.flush()
-                time.sleep(INTERVAL)
-                elapsed_time += INTERVAL
+                try:
+                    response = http_request_with_retries(
+                        "get", task_url, auth=(bmc_username, bmc_password)
+                    )
+                    check_response_success(
+                        response, f"Failed to query status of task {task_index}."
+                    )
+                    status_data = response.json()
+                    status = status_data.get("TaskState", "Unknown")
+                except Exception as e:
+                    log(f"Exception while querying task {task_index}: {e}")
+                    sys.exit(1)
 
-            if elapsed_time > TIMEOUT_SECONDS:
-                log(
-                    f"Task {task_index} failed to complete within {TIMEOUT_SECONDS // 60} minutes."
-                )
-                sys.exit(1)
+                if status == "Completed":
+                    if DEBUG:
+                        print(f"\nTask {task_index} completed successfully.")
+                    break
+                elif status == "Failed":
+                    log(f"Task {task_index} failed.")
+                    sys.exit(1)
+                elif status in ["Running", "New", "Pending"]:
+                    # Show ongoing progress
+                    newline_needed = True
+                    print(
+                        f"\rTask {task_index} is still running, elapsed {elapsed_time}s",
+                        end="",
+                    )
+                    sys.stdout.flush()
+                    time.sleep(INTERVAL)
+                    elapsed_time += INTERVAL
+                else:
+                    newline_needed = True
+                    print(
+                        f"\rUnknown task status: {status}, task {task_index}, elapsed {elapsed_time}s",
+                        end="",
+                    )
+                    sys.stdout.flush()
+                    time.sleep(INTERVAL)
+                    elapsed_time += INTERVAL
 
-        if newline_needed:
-            print()  # End the progress line
+                if elapsed_time > TIMEOUT_SECONDS:
+                    log(
+                        f"Task {task_index} failed to complete within {TIMEOUT_SECONDS // 60} minutes."
+                    )
+                    sys.exit(1)
+
+            if newline_needed:
+                print()  # End the progress line
 
 
 def main():
@@ -287,14 +584,31 @@ def main():
         log("Authentication failed. Please check IP address, username, and password.")
         log(f"IP address used: {bmc_ip}")
         log(f"Username used: {bmc_username}")
+
         if DEBUG:
             log(f"Password used: {bmc_password}")
+
         sys.exit(1)
 
     # ----------------------------------------------------------------
-    # 3. Collect diagnostic data (AllLogs)
+    # 3. Get BMC version
     # ----------------------------------------------------------------
-    log("Collecting AllLogs file...")
+    getBmcVersion(bmc_ip, bmc_username, bmc_password)
+
+    # ----------------------------------------------------------------
+    # 4. Confirm connection to UBB
+    # ----------------------------------------------------------------
+    checkUbb(bmc_ip, bmc_username, bmc_password)
+
+    # ----------------------------------------------------------------
+    # 5. Get BKC version
+    # ----------------------------------------------------------------
+    getBkcVersion(bmc_ip, bmc_username, bmc_password)
+
+    # ----------------------------------------------------------------
+    # 6. Generate diagnostic data (AllLogs)
+    # ----------------------------------------------------------------
+    log("Generating AllLogs file...")
     collect_url = (
         f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/"
         "LogServices/DiagLogs/Actions/LogService.CollectDiagnosticData"
@@ -312,18 +626,23 @@ def main():
 
     # Extract Task ID from the response text
     match = re.search(r'Tasks/([^"]+)', response.text)
+
     if not match:
         log("Script failed, no valid task ID found in response.")
         sys.exit(1)
-    tasks_id = match.group(1)  # Not used further, but confirms presence
+
+    task_id = match.group(1)
+
+    if DEBUG:
+        log(f"AllLogs task ID: {task_id}")
 
     # ----------------------------------------------------------------
-    # 4. Wait for tasks to complete
+    # 7. Wait for tasks to complete
     # ----------------------------------------------------------------
     tasks_wait(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 5. Get count of diagnostic log entries
+    # 8. Get count of diagnostic log entries
     # ----------------------------------------------------------------
     entries_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/LogServices/DiagLogs/Entries"
     try:
@@ -342,9 +661,10 @@ def main():
         sys.exit(1)
 
     # ----------------------------------------------------------------
-    # 6. Find entry with the greatest 'Id'
+    # 9. Find entry with the greatest 'Id'
     # ----------------------------------------------------------------
     members = diag_data.get("Members", [])
+
     if not members:
         log("Script failed, 'Members' array is empty or missing.")
         sys.exit(1)
@@ -369,19 +689,21 @@ def main():
         log(f"Greatest entry ID: {id_greatest}")
 
     # ----------------------------------------------------------------
-    # 7. Verify the entry is of type "AllLogs"
+    # 10. Verify the entry is of type "AllLogs"
     # ----------------------------------------------------------------
     entry_type = members[entry_greatest_index].get("OEMDiagnosticDataType", "")
+
     if entry_type != "AllLogs":
         log(f"Entry ID {id_greatest} is of type '{entry_type}' instead of 'AllLogs'.")
         sys.exit(1)
 
     # ----------------------------------------------------------------
-    # 8. Download the attachment
+    # 11. Download the attachment
     # ----------------------------------------------------------------
     log("Downloading AllLogs...")
 
     attachment_uri = members[entry_greatest_index].get("AdditionalDataURI", "")
+
     if not attachment_uri:
         log("No 'AdditionalDataURI' found for the chosen entry.")
         sys.exit(1)
@@ -404,7 +726,10 @@ def main():
         log(f"Exception while downloading logs: {e}")
         sys.exit(1)
 
-    log(f"All logs downloaded as {filename}")
+    if os.path.getsize(filename) > 180 * 1024:  # 180 KB in bytes
+        log(f"All logs downloaded as {filename}")
+    else:
+        log(f"Error: {filename} is NOT larger than 180 KB, assumed download failed")
 
 
 if __name__ == "__main__":
