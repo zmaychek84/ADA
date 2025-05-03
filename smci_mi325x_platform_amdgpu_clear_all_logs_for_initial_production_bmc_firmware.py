@@ -39,6 +39,7 @@ REDFISH_OEM = "redfish/v1"
 REDFISH_MANAGER_BMC = "redfish/v1/Managers/1"
 REDFISH_SYSTEM_BMC = "redfish/v1/Systems/1"
 REDFISH_UBB_TASKS = "none"  # Subject to change
+REDFISH_POWER_ENDPOINT = "redfish/v1/Chassis/1/Power"
 PORT = 443
 PROTOCOL = "https"
 POWER_ON = {"Action": "Reset", "ResetType": "On"}
@@ -189,6 +190,61 @@ def authenticate(bmc_ip, bmc_username, bmc_password):
         return False
 
     return True
+
+
+def check_power_supplies(bmc_ip, bmc_username, bmc_password):
+    """
+    Check if all power supplies are working correctly and have power.
+    """
+    url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_POWER_ENDPOINT}"
+
+    try:
+        response = requests.get(
+            url, auth=(bmc_username, bmc_password), verify=False, timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to retrieve power data: {e}")
+        return False
+
+    psus = data.get("PowerSupplies", [])
+
+    if not psus:
+        print("No power supplies found.")
+        return False
+
+    all_ok = True
+
+    for psu in psus:
+        name = psu.get("Name", "Unknown PSU")
+        status = psu.get("Status", {})
+        state = status.get("State", "Unknown")
+        health = status.get("Health", "Unknown")
+        # present = psu.get(
+        #    "PhysicalContext", "Unknown"
+        # )  # Some vendors use "Present" or "Status.State" as indicators
+
+        if state != "Enabled" or health != "OK":
+            print(f"[FAIL] {name}: State={state}, Health={health}")
+            all_ok = False
+        else:
+            if DEBUG:
+                print(f"[OK]   {name}: State={state}, Health={health}")
+
+    if all_ok:
+        return True
+    else:
+        log(
+            "Some power supplies are missing connection or are faulty which is most likely causing system issues"
+        )
+        print("\t1. Inspect power supplies")
+        print(
+            "\t2. Ensure all power supply connections are connected to active outlets"
+        )
+        print("\t3. Clear all GPU logs")
+        print("\t4. Run AGFHC or RVS to exercise GPUs to is if errors persist")
+        return False
 
 
 def checkUbb(bmc_ip, bmc_username, bmc_password, max_attempts=2):
@@ -596,22 +652,28 @@ def main():
     getBmcVersion(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 4. Confirm connection to UBB
+    # 4. Check to make sure all PSU have power
+    # ----------------------------------------------------------------
+    if not check_power_supplies(bmc_ip, bmc_username, bmc_password):
+        sys.exit(1)
+
+    # ----------------------------------------------------------------
+    # 5. Confirm connection to UBB
     # ----------------------------------------------------------------
     checkUbb(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 5. Get BKC version
+    # 6. Get BKC version
     # ----------------------------------------------------------------
     getBkcVersion(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 6. Clear the logs
+    # 7. Clear the logs
     # ----------------------------------------------------------------
     logsClear(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 7. Cycle power so that new logs generate
+    # 8. Cycle power so that new logs generate
     # ----------------------------------------------------------------
     systemPowerCycle(bmc_ip, bmc_username, bmc_password)
 

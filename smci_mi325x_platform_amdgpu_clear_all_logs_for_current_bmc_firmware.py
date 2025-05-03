@@ -25,7 +25,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # --------------------------------------------------------------------
 # Setup argument parsing for optional debug mode
 # --------------------------------------------------------------------
-parser = argparse.ArgumentParser(description="Collect AllLogs from BMC via Redfish")
+parser = argparse.ArgumentParser(description="Erase all MI300X logs via Redfish")
 parser.add_argument("--debug", action="store_true", help="Enable debug output")
 parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
 args = parser.parse_args()
@@ -35,10 +35,10 @@ VERBOSE = args.verbose
 # --------------------------------------------------------------------
 # Constants for porting between platforms
 # --------------------------------------------------------------------
-REDFISH_OEM = "redfish/v1"
+REDFISH_OEM = "redfish/v1/Oem/Supermicro/MI325X"
 REDFISH_MANAGER_BMC = "redfish/v1/Managers/1"
 REDFISH_SYSTEM_BMC = "redfish/v1/Systems/1"
-REDFISH_UBB_TASKS = "none"  # Use a delay since BMC version does not support feature
+REDFISH_UBB_TASKS = "redfish/v1/Oem/Supermicro/MI325X/TaskService/Tasks"
 REDFISH_POWER_ENDPOINT = "redfish/v1/Chassis/1/Power"
 PORT = 443
 PROTOCOL = "https"
@@ -668,130 +668,16 @@ def main():
     getBkcVersion(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 7. Generate diagnostic data (AllLogs)
+    # 7. Clear the logs
     # ----------------------------------------------------------------
-    log("Generating AllLogs file...")
-    collect_url = (
-        f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/"
-        "LogServices/DiagLogs/Actions/LogService.CollectDiagnosticData"
-    )
-    payload = {"DiagnosticDataType": "OEM", "OEMDiagnosticDataType": "AllLogs"}
-
-    try:
-        response = http_request_with_retries(
-            "post", collect_url, auth=(bmc_username, bmc_password), json=payload
-        )
-        check_response_success(response, "Failed to collect diagnostic data.")
-    except Exception as e:
-        log(f"Exception while collecting diagnostic data: {e}")
-        sys.exit(1)
-
-    # Extract Task ID from the response text
-    match = re.search(r'Tasks/([^"]+)', response.text)
-
-    if not match:
-        log("Script failed, no valid task ID found in response.")
-        sys.exit(1)
-
-    task_id = match.group(1)
-
-    if DEBUG:
-        log(f"AllLogs task ID: {task_id}")
+    logsClear(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 8. Wait for tasks to complete
+    # 8. Cycle power so that new logs generate
     # ----------------------------------------------------------------
-    tasks_wait(bmc_ip, bmc_username, bmc_password)
+    systemPowerCycle(bmc_ip, bmc_username, bmc_password)
 
-    # ----------------------------------------------------------------
-    # 9. Get count of diagnostic log entries
-    # ----------------------------------------------------------------
-    entries_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/LogServices/DiagLogs/Entries"
-    try:
-        response = http_request_with_retries(
-            "get", entries_url, auth=(bmc_username, bmc_password)
-        )
-        check_response_success(response, "Failed to get diagnostic log entries.")
-        diag_data = response.json()
-        entries_count = diag_data.get("Members@odata.count", 0)
-    except Exception as e:
-        log(f"Exception while retrieving log entries: {e}")
-        sys.exit(1)
-
-    if entries_count == 0:
-        log("Script failed, no diagnostic logs found.")
-        sys.exit(1)
-
-    # ----------------------------------------------------------------
-    # 10. Find entry with the greatest 'Id'
-    # ----------------------------------------------------------------
-    members = diag_data.get("Members", [])
-
-    if not members:
-        log("Script failed, 'Members' array is empty or missing.")
-        sys.exit(1)
-
-    id_greatest = -1
-    entry_greatest_index = -1
-
-    for i, entry in enumerate(members):
-        try:
-            entry_id = int(entry.get("Id", -1))
-            if entry_id >= id_greatest:
-                id_greatest = entry_id
-                entry_greatest_index = i
-        except ValueError:
-            continue
-
-    if entry_greatest_index == -1:
-        log("Script failed, no valid numeric 'Id' found in the log entries.")
-        sys.exit(1)
-
-    if DEBUG:
-        log(f"Greatest entry ID: {id_greatest}")
-
-    # ----------------------------------------------------------------
-    # 11. Verify the entry is of type "AllLogs"
-    # ----------------------------------------------------------------
-    entry_type = members[entry_greatest_index].get("OEMDiagnosticDataType", "")
-
-    if entry_type != "AllLogs":
-        log(f"Entry ID {id_greatest} is of type '{entry_type}' instead of 'AllLogs'.")
-        sys.exit(1)
-
-    # ----------------------------------------------------------------
-    # 12. Download the attachment
-    # ----------------------------------------------------------------
-    log("Downloading AllLogs...")
-
-    attachment_uri = members[entry_greatest_index].get("AdditionalDataURI", "")
-
-    if not attachment_uri:
-        log("No 'AdditionalDataURI' found for the chosen entry.")
-        sys.exit(1)
-
-    download_url = f"{PROTOCOL}://{bmc_ip}:{PORT}{attachment_uri}"
-    filename = (
-        f"{bmc_ip}_{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}_all_logs.tar.xz"
-    )
-
-    try:
-        with http_request_with_retries(
-            "get", download_url, auth=(bmc_username, bmc_password), stream=True
-        ) as r:
-            check_response_success(r, f"Failed to download logs at {download_url}")
-            with open(filename, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-    except Exception as e:
-        log(f"Exception while downloading logs: {e}")
-        sys.exit(1)
-
-    if os.path.getsize(filename) > 180 * 1024:  # 180 KB in bytes
-        log(f"All logs downloaded as {filename}")
-    else:
-        log(f"Error: {filename} is NOT larger than 180 KB, assumed download failed")
+    log(f"All done.")
 
 
 if __name__ == "__main__":

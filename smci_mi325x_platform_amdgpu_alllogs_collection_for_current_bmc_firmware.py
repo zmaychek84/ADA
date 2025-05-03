@@ -35,10 +35,10 @@ VERBOSE = args.verbose
 # --------------------------------------------------------------------
 # Constants for porting between platforms
 # --------------------------------------------------------------------
-REDFISH_OEM = "redfish/v1"
+REDFISH_OEM = "redfish/v1/Oem/Supermicro/MI325X"
 REDFISH_MANAGER_BMC = "redfish/v1/Managers/1"
 REDFISH_SYSTEM_BMC = "redfish/v1/Systems/1"
-REDFISH_UBB_TASKS = "none"  # Use a delay since BMC version does not support feature
+REDFISH_UBB_TASKS = "redfish/v1/Oem/Supermicro/MI325X/TaskService/Tasks"
 REDFISH_POWER_ENDPOINT = "redfish/v1/Chassis/1/Power"
 PORT = 443
 PROTOCOL = "https"
