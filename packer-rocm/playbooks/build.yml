@@ -113,9 +113,13 @@
             name: "{{ packer_prereqs['common'] + (packer_prereqs[ansible_os_family] | default([])) }}"
             state: present
 
-        - name: "Ensure Packer plugins are installed"
-          ansible.builtin.command: "{{ packer_binary }} init {{ (workdir, packer_dist) | path_join }}"
-          changed_when: false
+        - name: "Run 'packer init', ensure plugin coverage"
+          ansible.builtin.command:
+            cmd: "{{ packer_binary }} init ."
+            chdir: "{{ (workdir, packer_dist) | path_join }}"
+          environment:
+            PACKER_LOG: '1'  # wanted as str
+          changed_when: false  # command w/ assumed changes: report 'ok' or failure
 
     - name: Build
       tags: ['build']
@@ -130,14 +134,6 @@
         - name: Set Packer variables as Ansible fact
           ansible.builtin.set_fact:
             packer_vars: "{{ packer_rocm_hcl_awk.stdout_lines | replace('\"', '') }}"
-
-        - name: "Run 'packer init', ensure plugin coverage"
-          ansible.builtin.command:
-            cmd: 'packer init .'
-            chdir: "{{ (workdir, packer_dist) | path_join }}"
-          environment:
-            PACKER_LOG: '1'  # wanted as str
-          changed_when: false  # command w/ assumed changes: report 'ok' or failure
 
         - name: "Run 'packer build', create '{{ _creates }}'"
           ansible.builtin.command:
