@@ -39,6 +39,7 @@ REDFISH_OEM = "redfish/v1/Oem/Supermicro/MI300X"
 REDFISH_MANAGER_BMC = "redfish/v1/Managers/1"
 REDFISH_SYSTEM_BMC = "redfish/v1/Systems/1"
 REDFISH_UBB_TASKS = "redfish/v1/Oem/Supermicro/MI300X/TaskService/Tasks"
+REDFISH_POWER_ENDPOINT = "redfish/v1/Chassis/1/Power"
 PORT = 443
 PROTOCOL = "https"
 POWER_ON = {"Action": "Reset", "ResetType": "On"}
@@ -186,6 +187,64 @@ def authenticate(bmc_ip, bmc_username, bmc_password):
             return False
     except Exception as e:
         log(f"Exception while authenticating: {e}")
+        return False
+
+    return True
+
+
+def check_power_supplies(bmc_ip, bmc_username, bmc_password):
+    """
+    Check if all power supplies are working correctly and have power.
+    """
+    url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_POWER_ENDPOINT}"
+
+    try:
+        response = requests.get(
+            url, auth=(bmc_username, bmc_password), verify=False, timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to retrieve power data: {e}")
+        return False
+
+    psus = data.get("PowerSupplies", [])
+
+    if not psus:
+        print("No power supplies found.")
+        return False
+
+    total_psu = 0
+    failing_psu = 0
+
+    for psu in psus:
+        total_psu += 1
+        name = psu.get("Name", "Unknown PSU")
+        status = psu.get("Status", {})
+        state = status.get("State", "Unknown")
+        health = status.get("Health", "Unknown")
+        # present = psu.get(
+        #    "PhysicalContext", "Unknown"
+        # )  # Some vendors use "Present" or "Status.State" as indicators
+
+        if state != "Enabled" or health != "OK":
+            print(f"[FAIL] {name}: State={state}, Health={health}")
+            failing_psu += 1
+        else:
+            if DEBUG:
+                print(f"[OK]   {name}: State={state}, Health={health}")
+
+    # If more than half the PSU are failing
+    if total_psu / 2 > failing_psu:
+        log(
+            "More than half power supplies are missing connection or are faulty which is most likely causing system issues"
+        )
+        print("\t1. Inspect power supplies")
+        print(
+            "\t2. Ensure all power supply connections are connected to active outlets"
+        )
+        print("\t3. Clear all GPU logs")
+        print("\t4. Run AGFHC or RVS to exercise GPUs to is if errors persist")
         return False
 
     return True
@@ -596,17 +655,23 @@ def main():
     getBmcVersion(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 4. Confirm connection to UBB
+    # 4. Check to make sure all PSU have power
+    # ----------------------------------------------------------------
+    if not check_power_supplies(bmc_ip, bmc_username, bmc_password):
+        sys.exit(1)
+
+    # ----------------------------------------------------------------
+    # 5. Confirm connection to UBB
     # ----------------------------------------------------------------
     checkUbb(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 5. Get BKC version
+    # 6. Get BKC version
     # ----------------------------------------------------------------
     getBkcVersion(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 6. Generate diagnostic data (AllLogs)
+    # 7. Generate diagnostic data (AllLogs)
     # ----------------------------------------------------------------
     log("Generating AllLogs file...")
     collect_url = (
@@ -637,12 +702,12 @@ def main():
         log(f"AllLogs task ID: {task_id}")
 
     # ----------------------------------------------------------------
-    # 7. Wait for tasks to complete
+    # 8. Wait for tasks to complete
     # ----------------------------------------------------------------
     tasks_wait(bmc_ip, bmc_username, bmc_password)
 
     # ----------------------------------------------------------------
-    # 8. Get count of diagnostic log entries
+    # 9. Get count of diagnostic log entries
     # ----------------------------------------------------------------
     entries_url = f"{PROTOCOL}://{bmc_ip}:{PORT}/{REDFISH_OEM}/Systems/UBB/LogServices/DiagLogs/Entries"
     try:
@@ -661,7 +726,7 @@ def main():
         sys.exit(1)
 
     # ----------------------------------------------------------------
-    # 9. Find entry with the greatest 'Id'
+    # 10. Find entry with the greatest 'Id'
     # ----------------------------------------------------------------
     members = diag_data.get("Members", [])
 
@@ -689,7 +754,7 @@ def main():
         log(f"Greatest entry ID: {id_greatest}")
 
     # ----------------------------------------------------------------
-    # 10. Verify the entry is of type "AllLogs"
+    # 11. Verify the entry is of type "AllLogs"
     # ----------------------------------------------------------------
     entry_type = members[entry_greatest_index].get("OEMDiagnosticDataType", "")
 
@@ -698,7 +763,7 @@ def main():
         sys.exit(1)
 
     # ----------------------------------------------------------------
-    # 11. Download the attachment
+    # 12. Download the attachment
     # ----------------------------------------------------------------
     log("Downloading AllLogs...")
 

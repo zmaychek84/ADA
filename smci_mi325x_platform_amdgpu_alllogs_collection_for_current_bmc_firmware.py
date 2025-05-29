@@ -214,9 +214,11 @@ def check_power_supplies(bmc_ip, bmc_username, bmc_password):
         print("No power supplies found.")
         return False
 
-    all_ok = True
+    total_psu = 0
+    failing_psu = 0
 
     for psu in psus:
+        total_psu += 1
         name = psu.get("Name", "Unknown PSU")
         status = psu.get("Status", {})
         state = status.get("State", "Unknown")
@@ -227,16 +229,15 @@ def check_power_supplies(bmc_ip, bmc_username, bmc_password):
 
         if state != "Enabled" or health != "OK":
             print(f"[FAIL] {name}: State={state}, Health={health}")
-            all_ok = False
+            failing_psu += 1
         else:
             if DEBUG:
                 print(f"[OK]   {name}: State={state}, Health={health}")
 
-    if all_ok:
-        return True
-    else:
+    # If more than half the PSU are failing
+    if total_psu / 2 > failing_psu:
         log(
-            "Some power supplies are missing connection or are faulty which is most likely causing system issues"
+            "More than half power supplies are missing connection or are faulty which is most likely causing system issues"
         )
         print("\t1. Inspect power supplies")
         print(
@@ -245,6 +246,8 @@ def check_power_supplies(bmc_ip, bmc_username, bmc_password):
         print("\t3. Clear all GPU logs")
         print("\t4. Run AGFHC or RVS to exercise GPUs to is if errors persist")
         return False
+
+    return True
 
 
 def checkUbb(bmc_ip, bmc_username, bmc_password, max_attempts=2):
