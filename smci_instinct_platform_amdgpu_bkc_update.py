@@ -29,18 +29,26 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 parser = argparse.ArgumentParser(
     description="Update the Instinct platform BKC via Redfish"
 )
-parser.add_argument("--debug", action="store_true", help="Enable debug output")
-parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+parser.add_argument("-d", "--debug", action="store_true", help="Enable debug output")
+parser.add_argument(
+    "-v", "--verbose", action="store_true", help="Enable verbose output"
+)
+parser.add_argument(
+    "--no-power-off",
+    action="store_true",
+    help="Do not power off the system even if power cycle required",
+)
 args = parser.parse_args()
 DEBUG = args.debug
 VERBOSE = args.verbose
+NO_POWER_OFF = args.no_power_off
 
 # --------------------------------------------------------------------
 # Constants for porting between platforms
 # --------------------------------------------------------------------
 # Please note that additional customization is assumed to be needed for
 # reading the BKC version and checking the power supplies.
-# Overwitten for Supermicro REDFISH_OEM = "redfish/v1/Oem/Supermicro/MI300X"
+# Overwritten for Supermicro REDFISH_OEM = "redfish/v1/Oem/Supermicro/MI300X"
 REDFISH_MANAGER_BMC = "redfish/v1/Managers/1"
 REDFISH_SYSTEM_BMC = "redfish/v1/Systems/1"
 # Overwritten for Supermicro REDFISH_UBB_TASKS = "redfish/v1/Oem/Supermicro/MI300X/TaskService/Tasks"
@@ -583,6 +591,13 @@ def systemPowerCycle(bmc_ip, bmc_username, bmc_password):
     This implies an off-then-wait-then-on sequence.
     """
     dwell = 120
+
+    if NO_POWER_OFF == True:
+        log(
+            "A power cycle is required at this point, but powering off the system has been disabled by a script option.  Exiting."
+        )
+        sys.exit(1)
+
     log("Initiating DC power cycle")
     systemPowerOff(bmc_ip, bmc_username, bmc_password)
     log(f"Dropping power for {dwell // 60} minutes")
@@ -802,7 +817,7 @@ def update_bkc(bmc_ip, bmc_username, bmc_password):
     tasks_smc_wait(bmc_ip, bmc_username, bmc_password)
 
     timeout = 13 * 60  # 13 minutes in seconds
-    interval = 20      # Check every 20 seconds
+    interval = 20  # Check every 20 seconds
     elapsed = 0
 
     while elapsed < timeout:
@@ -883,6 +898,10 @@ def tasks_wait(url, bmc_ip, bmc_username, bmc_password):
             elif status == "Failed":
                 log(f"Task {task} failed.")
                 sys.exit(1)
+            elif status == "Exception":
+                if DEBUG:
+                    print(f"\nTask {task} has an exception, moving to next task.")
+                break
             elif status in ["Running", "New", "Pending"]:
                 # Show ongoing progress
                 newline_needed = True
