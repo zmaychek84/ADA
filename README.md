@@ -64,9 +64,10 @@ python3 smci_instinct_platform_amdgpu_alllogs_collection.py
 
 ### Parameters
 
-| Parameter | Description                                                                          |  
-|-----------|--------------------------------------------------------------------------------------|  
-| --debug   | Adding the --debug option will provide debug information and show the BMC password.  |  
+| Parameter      | Description                                                                          |  
+|----------------|--------------------------------------------------------------------------------------|  
+| --debug        | Adding the --debug option will provide debug information and show the BMC password.  |  
+| --no-power-off | Do not power off the system even if power cycle required                             |  
 
 ### Batch use
 
@@ -131,9 +132,10 @@ python3 smci_instinct_platform_amdgpu_clear_all_logs.py
 
 ### Parameters
 
-| Parameter | Description                                                                          |  
-|-----------|--------------------------------------------------------------------------------------|  
-| --debug   | Adding the --debug option will provide debug information and show the BMC password.  |  
+| Parameter      | Description                                                                          |  
+|----------------|--------------------------------------------------------------------------------------|  
+| --debug        | Adding the --debug option will provide debug information and show the BMC password.  |  
+| --no-power-off | Do not power off the system even if power cycle required                             |  
 
 ### Batch use
 
@@ -197,9 +199,10 @@ python3 smci_instinct_platform_amdgpu_update_bkc.py
 ```
 ### Parameters
 
-| Parameter | Description                                                                          |  
-|-----------|--------------------------------------------------------------------------------------|  
-| --debug   | Adding the --debug option will provide debug information and show the BMC password.  |  
+| Parameter      | Description                                                                          |  
+|----------------|--------------------------------------------------------------------------------------|  
+| --debug        | Adding the --debug option will provide debug information and show the BMC password.  |  
+| --no-power-off | Do not power off the system even if power cycle required                             |  
 
 ### Batch use
 
