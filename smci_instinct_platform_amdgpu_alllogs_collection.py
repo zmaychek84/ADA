@@ -346,7 +346,7 @@ def checkUbb(bmc_ip, bmc_username, bmc_password, max_attempts=2):
     REDFISH_OEM = None
     REDFISH_UBB_TASKS = None
     # List of GPU models
-    gpu_models = ["MI300X", "MI308X", "MI325X", "MI350X", "MI355X"]
+    gpu_models = ["MI300X", "MI300", "MI308X", "MI308", "MI325X", "MI325", "MI350X", "MI350", "MI355X", "MI355"]
 
     # Loop through each model
     for model in gpu_models:
