@@ -1,0 +1,81 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Glog.AI",
+          "organization": "Glog.AI",
+          "fullName": "Glog, Making software more secure",
+          "version": "1.0.0",
+          "semanticVersion": "1.0.0",
+          "informationUri": "https://www.glog.ai",
+          "rules": [
+            {
+              "id": "glog-db9514ec-8869-47a6-9c67-2f8b5ea355c1",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nDisabling SSL Certificate Checks Vulnerability in Python occurs when the programmer intentionally disables SSL certificate checks while making a request to a server. This can lead to Man-in-the-Middle (MitM) attacks where an attacker can intercept and possibly alter the communication between the client and the server.\n\nIn Python, this vulnerability can occur when using the `requests` library to make HTTP requests. If the `verify` parameter of the `requests.get` function is set to `False`, SSL certificate checks are disabled.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, never disable SSL certificate checks when making requests to a server. Always set the `verify` parameter of the `requests.get` function to `True` or do not specify it at all as it defaults to `True`.\n\n## Source Code Fix Recommendation\n\nHere is an example of vulnerable code:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=False)\n```\n\nTo fix this vulnerability, simply set the `verify` parameter to `True` or remove it:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=True)\n```\n\nor\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com')\n```\n\n## Library Dependencies\n\nThe only library dependency required by the code example is:\n\n- `requests`\n\n## References\n\n- [OWASP - Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B501"
+                ]
+              }
+            }
+          ],
+          "language": "en-US",
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "isComprehensive": false
+        }
+      },
+      "language": "en-US",
+      "results": [
+        {
+          "ruleId": "glog-db9514ec-8869-47a6-9c67-2f8b5ea355c1",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "\"Disabling SSL Certificate Checks Vulnerability\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py"
+                },
+                "region": {
+                  "startLine": 218,
+                  "startColumn": 20,
+                  "endLine": 219,
+                  "endColumn": 10,
+                  "snippet": {
+                    "text": "        response = requests.get(\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 218,
+                  "endLine": 222,
+                  "snippet": {
+                    "text": "        response = requests.get(\n            url, auth=(bmc_username, bmc_password), verify=False, timeout=10\n        )\n        response.raise_for_status()\n        data = response.json()\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        }
+      ],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ]
+    }
+  ]
+}
