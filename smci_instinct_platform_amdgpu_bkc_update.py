@@ -1011,6 +1011,16 @@ def main():
     # ----------------------------------------------------------------
     update_bkc(bmc_ip, bmc_username, bmc_password)
 
+    # ----------------------------------------------------------------
+    # 8. Clear the logs
+    # ----------------------------------------------------------------
+    logsClear(bmc_ip, bmc_username, bmc_password)
+
+    # ----------------------------------------------------------------
+    # 9. Cycle power so that new logs generate
+    # ----------------------------------------------------------------
+    systemPowerCycle(bmc_ip, bmc_username, bmc_password)
+
     log(f"All done.")
 
 
