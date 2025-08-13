@@ -757,10 +757,10 @@ def logsAllGet(bmc_ip, bmc_username, bmc_password):
         log(f"Exception while downloading logs: {e}")
         sys.exit(1)
 
-    if os.path.getsize(filename) > 180 * 1024:  # 180 KB in bytes
+    if os.path.getsize(filename) > 105 * 1024:  # 105 KB in bytes
         log(f"All logs downloaded as {filename}")
     else:
-        log(f"Error: {filename} is NOT larger than 180 KB, assumed download failed")
+        log(f"Error: {filename} is NOT larger than 105 KB, assumed download failed")
 
 
 def update_bkc(bmc_ip, bmc_username, bmc_password):
