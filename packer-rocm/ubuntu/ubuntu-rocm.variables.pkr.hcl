@@ -60,7 +60,7 @@ variable "filename" {
 variable "rocm_kernel" {
   type = string
   default = "linux-image-generic-hwe-22.04"
-  description = "The kernel to include with the image. May include version specifier. Software will be compiled against this; define headers/extra-modules/others in 'rocm_extras'"
+  description = "The kernel metapackage (image, modules, and headers) to include with the image. Software will be compiled against this."
 }
 
 variable "rocm_extras" {
