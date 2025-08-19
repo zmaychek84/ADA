@@ -18,7 +18,7 @@
           summary: 'AMD site customizations'
           include: 'network-throughput'  # package/distribution-provided profile to build ours upon
         bootloader:  # one of many plugins; shouldn't be repeated. the 'cmdline_...' keys should be globally unique
-          cmdline_amdsre_debug: 'earlyprintk=ttyS1,keep'
+          # cmdline_amdsre_debug: 'earlyprintk=ttyS1,keep'
           cmdline_amdsre_iommu: 'amd_iommu=on iommu=pt nokaslr'
           cmdline_amdsre_pci: 'pci=realloc=off pcie_aspm=off'
           cmdline_amdsre_perf_security: 'msr.allow_writes=on'
