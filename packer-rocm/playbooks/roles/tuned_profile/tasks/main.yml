@@ -1,7 +1,7 @@
 ---
 
 - name: Preparation block
-  when: prep_facts is not defined
+  when: tuned_profile_prep_facts is not defined
   block:  # skip considerable work if this role is applied multiple times in a play
 
     - name: Ensure 'tuned' is installed
@@ -68,7 +68,7 @@
 
     - name: Gather package facts
       ansible.builtin.package_facts:
-      register: prep_facts
+      register: tuned_profile_prep_facts
 
 # per-profile tasks follow
 
@@ -110,7 +110,6 @@
   become: true
   ansible.builtin.command: "tuned-adm profile {{ tuned_profile_name }}"
   changed_when: "ansible_local['tuned']['selected_profile'] != tuned_profile_name"  # always try to set; report change based on prior facts
-  register: tunedadm
   when: tuned_profile_enable is truthy(convert_bool=True)
   notify: tuned_handler_reboot
 

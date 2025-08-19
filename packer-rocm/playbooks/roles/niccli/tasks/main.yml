@@ -99,13 +99,13 @@
       ansible.builtin.command: 'grep ib_umem_get_peer /proc/kallsyms'
       changed_when: false  # gathering info
       ignore_errors: true  # failure is a desirable signal. if symbol is *not* present: 'netxtreme-peer-mem' is pulled in for support
-      register: cmd_ib_umem_chk
+      register: niccli_cmd_ib_umem_chk
 
     - name: Handle 'netxtreme-peer-mem' on required kernel/driver/userspace pairings
       become: true
       when:
         - niccli_driver is truthy(convert_bool=True)
-        - cmd_ib_umem_chk is failed
+        - niccli_cmd_ib_umem_chk is failed
       block:
 
         - name: "Search for 'netxtreme-peer-mem' package in '/tmp/niccli'"
@@ -138,11 +138,11 @@
     - name: "Stat 'libbnxt_re-rdmav34.so'; absence requires build"
       ansible.builtin.stat:
         path: '/usr/local/lib/libbnxt_re-rdmav34.so'
-      register: libbnxt_re_stat
+      register: niccli_libbnxt_re_stat
 
     - name: "Include 'libbnxt_re' source-building tasks"
       ansible.builtin.include_tasks:
         file: libbnxt_re.yml
       when:
         - "'libbnxt_re' not in ansible_facts.packages"
-        - not libbnxt_re_stat.stat.exists
+        - not niccli_libbnxt_re_stat.stat.exists
