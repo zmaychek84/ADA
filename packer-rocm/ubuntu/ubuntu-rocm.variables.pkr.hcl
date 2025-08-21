@@ -59,7 +59,7 @@ variable "filename" {
 
 variable "rocm_kernel" {
   type = string
-  default = "linux-image-generic-hwe-22.04"
+  default = "linux-generic-hwe-22.04"
   description = "The kernel metapackage (image, modules, and headers) to include with the image. Software will be compiled against this."
 }
 
