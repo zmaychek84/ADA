@@ -62,7 +62,7 @@ Remove `-K` if your account does _not_ require a passphrase for `sudo`. This is 
 | `amdgpu_install_args` | Optional dictionary of arguments to pass to `amdgpu-install`.<br/>**Default:** _Skipped_ |
 | `amdgpu_install_branch` | Optional development branch of the `amdgpu` driver with `amdgpu-install-internal`<br/>**Default:** _Skipped_ |
 | `amdgpu_install_rocm_branch` | Optional development branch for `rocm` software with `amdgpu-install-internal`<br/>**Default:** _Skipped_ |
-| `rocm_kernel` | The kernel metapackage _(image, modules, and headers)_ to include. [Upstream Reference](https://launchpad.net/ubuntu/+source/linux-meta) <br/>**Default:** `linux-image-generic-hwe-22.04`. |
+| `rocm_kernel` | The kernel metapackage _(image, modules, and headers)_ to include. [Upstream Reference](https://launchpad.net/ubuntu/+source/linux-meta) <br/>**Default:** `linux-generic-hwe-22.04`. |
 | `rocm_extras` | Packages installed before `amdgpu-install` _'usecases'_, comma-separated string with optional releases.<br/>**Default:** _linux-headers-generic-hwe-22.04,linux-image-extra-virtual-hwe-22.04_ |
 | `niccli_wanted` | If the _Broadcom_ [niccli](https://techdocs.broadcom.com/us/en/storage-and-ethernet-connectivity/ethernet-nic-controllers/bcm957xxx/adapters/Configuration-adapter/nic-cli-configuration-utility.html) software is included in the image.<br/>**Default:** `True` |
 | `niccli_url` | The URL for the `niccli` installation archive.<br/>**Default:** `https://docs.broadcom.com/docs-and-downloads/ethernet-network-adapters/NXE/Thor2/GCA2/bcm5760x_231.2.63.0a.zip` |
