@@ -590,7 +590,8 @@ def systemPowerCycle(bmc_ip, bmc_username, bmc_password):
     Cycle the power using the BMC.
     This implies an off-then-wait-then-on sequence.
     """
-    dwell = 120
+    dwell = 240
+    INTERVAL = 3
 
     if NO_POWER_OFF == True:
         log(
@@ -601,7 +602,15 @@ def systemPowerCycle(bmc_ip, bmc_username, bmc_password):
     log("Initiating DC power cycle")
     systemPowerOff(bmc_ip, bmc_username, bmc_password)
     log(f"Dropping power for {dwell // 60} minutes")
-    time.sleep(dwell)
+    remaining_time = dwell
+
+    while remaining_time > 0:
+        print(f"\rRemaining time: {remaining_time:>3}s", end="")
+        sys.stdout.flush()
+        time.sleep(INTERVAL)
+        remaining_time -= INTERVAL
+
+    print(f"\rRemaining time:   0s\r", end="")
     systemPowerOn(bmc_ip, bmc_username, bmc_password)
 
 
@@ -811,10 +820,12 @@ def update_bkc(bmc_ip, bmc_username, bmc_password):
         sys.exit(1)
 
     tasks_smc_wait(bmc_ip, bmc_username, bmc_password)
+    tasks_bmc_wait(bmc_ip, bmc_username, bmc_password)
 
     systemPowerCycle(bmc_ip, bmc_username, bmc_password)
 
     tasks_smc_wait(bmc_ip, bmc_username, bmc_password)
+    tasks_bmc_wait(bmc_ip, bmc_username, bmc_password)
 
     timeout = 13 * 60  # 13 minutes in seconds
     interval = 20  # Check every 20 seconds
