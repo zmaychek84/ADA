@@ -1,0 +1,2102 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Glog.AI",
+          "organization": "Glog.AI",
+          "fullName": "Glog, Making software more secure",
+          "version": "1.0.0",
+          "semanticVersion": "1.0.0",
+          "informationUri": "https://www.glog.ai",
+          "rules": [
+            {
+              "id": "glog-ae4e1e82-0265-4677-909c-d59753fe22a9",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nDisabling SSL Certificate Checks Vulnerability in Python occurs when the programmer intentionally disables SSL certificate checks while making a request to a server. This can lead to Man-in-the-Middle (MitM) attacks where an attacker can intercept and possibly alter the communication between the client and the server.\n\nIn Python, this vulnerability can occur when using the `requests` library to make HTTP requests. If the `verify` parameter of the `requests.get` function is set to `False`, SSL certificate checks are disabled.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, never disable SSL certificate checks when making requests to a server. Always set the `verify` parameter of the `requests.get` function to `True` or do not specify it at all as it defaults to `True`.\n\n## Source Code Fix Recommendation\n\nHere is an example of vulnerable code:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=False)\n```\n\nTo fix this vulnerability, simply set the `verify` parameter to `True` or remove it:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=True)\n```\n\nor\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com')\n```\n\n## Library Dependencies\n\nThe only library dependency required by the code example is:\n\n- `requests`\n\n## References\n\n- [OWASP - Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "B501"
+                ]
+              }
+            },
+            {
+              "id": "glog-d6c27adc-cbea-4b96-a6e8-2c54705394b6",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThis vulnerability arises when the `MinVersion` field in the `tls.Config` structure is not set in Python. The `MinVersion` field controls the minimum TLS version that is acceptable. If `MinVersion` is not set, the code will default to a lower TLS version, potentially enabling protocol downgrade attacks. This can lead to less secure connections and make the system susceptible to attacks such as POODLE (Padding Oracle On Downgraded Legacy Encryption).\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, always specify the `MinVersion` in the `tls.Config` structure. This ensures that the system uses a secure version of TLS and prevents protocol downgrade attacks.\n\n## Source Code Fix Recommendation\n\nHere is a Python code snippet that sets the `MinVersion` field:\n\n```python\nimport ssl\ncontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)\ncontext.options |= ssl.OP_NO_TLSv1\ncontext.options |= ssl.OP_NO_TLSv1_1\n```\n\nIn this example, the `MinVersion` is set to TLSv1.2, and the options to disable TLSv1 and TLSv1.1 are set.\n\n## Library Dependencies\n\nThe Python code example requires the `ssl` module, which is included in the Python Standard Library.\n\n## References\n\n- [OWASP Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-326: Inadequate Encryption Strength](https://cwe.mitre.org/data/definitions/326.html)"
+              },
+              "properties": {
+                "tags": [
+                  "go.lang.security.audit.crypto.missing-ssl-minversion.missing-ssl-minversion"
+                ]
+              }
+            },
+            {
+              "id": "glog-849e2898-aea0-490a-91af-2f7025478f3f",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe vulnerability \"Need for Explicit Version Tagging in Image Creation for Deterministic Container Images\" refers to the potential security risks associated with not specifying explicit versions for images when creating Docker containers in Python. When a Docker image is built without specifying a version, it will default to using the 'latest' version of the base image. This can lead to non-deterministic builds, as the 'latest' version can change over time, potentially introducing unexpected behavior or vulnerabilities.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to always specify an explicit version for the base image when creating a Dockerfile. This ensures that the build is deterministic and reproducible, reducing the risk of unexpected behavior or vulnerabilities being introduced.\n\n## Source Code Fix Recommendation\n\nHere is an example of how to specify an explicit version in a Dockerfile:\n\n```Dockerfile\n# Vulnerable code\nFROM busybox\n\n# Recommended fix\nFROM busybox:1.31.1\n```\n\nIn the above example, `1.31.1` is the explicit version of the `busybox` image. This version should be updated as necessary to use the most recent secure version of the image.\n\n## Library Dependencies\n\nThe code example does not require any library dependencies to execute properly.\n\n## References\n\n- [OWASP Docker Security](https://cheatsheetseries.owasp.org/cheatsheets/Docker_Security_Cheat_Sheet.html)\n- [CWE-74: Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')](https://cwe.mitre.org/data/definitions/74.html)\n\nPlease note that the links provided are active and accessible to anonymous users at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.missing-image-version"
+                ]
+              }
+            },
+            {
+              "id": "glog-10424096-33e9-4a69-a374-40f8e1e01e72",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nIn the context of Kubernetes, a privilege escalation attack is a type of security vulnerability that allows a user to gain more access and control than they are supposed to have. This can happen if the containers running in the Kubernetes cluster are not properly secured. \n\nIn Python, this vulnerability can occur if the application running inside the container is running as root, or if the application has insecure dependencies that can be exploited by an attacker. \n\n## Mitigation Advice\n\n1. **Don't run containers as root**: By default, Docker containers run as root. This means that if an attacker manages to break out of the container, they will have root access on the host machine. To prevent this, you should always run your containers as a non-root user.\n\n2. **Use minimal base images**: The more software you have installed in your container, the larger the attack surface. Therefore, you should use minimal base images that only contain the necessary software for your application.\n\n3. **Regularly update and patch your containers**: Just like any other software, containers can have vulnerabilities. Therefore, you should regularly update and patch your containers to fix any known vulnerabilities.\n\n4. **Use security context in your Kubernetes deployments**: Kubernetes allows you to set security contexts for your pods and containers. This allows you to define privilege and access controls for your containers.\n\n## Source Code Fix Recommendation\n\nHere is an example of how you can set a security context in your Kubernetes deployment:\n\n```yaml\napiVersion: v1\nkind: Pod\nmetadata:\n  name: security-context-pod\nspec:\n  securityContext:\n    runAsUser: 1000\n    runAsGroup: 3000\n    fsGroup: 2000\n  containers:\n  - name: sample-container\n    image: your-image\n```\n\nIn this example, the container will run as user 1000 and group 3000. The file system will be owned by group 2000.\n\n## Library Dependencies\n\nThe code example provided does not require any specific Python library dependencies as it is a Kubernetes configuration file.\n\n## References\n\n- [OWASP - Container Security](https://owasp.org/www-project-top-ten/2017/A5_2017-Broken_Access_Control)\n- [CWE - Privilege Escalation](https://cwe.mitre.org/data/definitions/269.html)"
+              },
+              "properties": {
+                "tags": [
+                  "yaml.kubernetes.security.run-as-non-root.run-as-non-root"
+                ]
+              }
+            },
+            {
+              "id": "glog-e9eca8e7-2e84-4590-84bb-6c17282de002",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nIn the context of Kubernetes, a privilege escalation attack is a type of security vulnerability that allows a user to gain more access and control than they are supposed to have. This can happen if the containers running in the Kubernetes cluster are not properly secured. \n\nIn Python, this vulnerability can occur if the application running inside the container is running as root, or if the application has insecure dependencies that can be exploited by an attacker. \n\n## Mitigation Advice\n\n1. **Don't run containers as root**: By default, Docker containers run as root. This means that if an attacker manages to break out of the container, they will have root access on the host machine. To prevent this, you should always run your containers as a non-root user.\n\n2. **Use minimal base images**: The more software you have installed in your container, the larger the attack surface. Therefore, you should use minimal base images that only contain the necessary software for your application.\n\n3. **Regularly update and patch your containers**: Just like any other software, containers can have vulnerabilities. Therefore, you should regularly update and patch your containers to fix any known vulnerabilities.\n\n4. **Use security context in your Kubernetes deployments**: Kubernetes allows you to set security contexts for your pods and containers. This allows you to define privilege and access controls for your containers.\n\n## Source Code Fix Recommendation\n\nHere is an example of how you can set a security context in your Kubernetes deployment:\n\n```yaml\napiVersion: v1\nkind: Pod\nmetadata:\n  name: security-context-pod\nspec:\n  securityContext:\n    runAsUser: 1000\n    runAsGroup: 3000\n    fsGroup: 2000\n  containers:\n  - name: sample-container\n    image: your-image\n```\n\nIn this example, the container will run as user 1000 and group 3000. The file system will be owned by group 2000.\n\n## Library Dependencies\n\nThe code example provided does not require any specific Python library dependencies as it is a Kubernetes configuration file.\n\n## References\n\n- [OWASP - Container Security](https://owasp.org/www-project-top-ten/2017/A5_2017-Broken_Access_Control)\n- [CWE - Privilege Escalation](https://cwe.mitre.org/data/definitions/269.html)"
+              },
+              "properties": {
+                "tags": [
+                  "yaml.kubernetes.security.run-as-non-root.run-as-non-root"
+                ]
+              }
+            },
+            {
+              "id": "glog-b8f9066b-6a46-4fca-b4cd-df21112862ca",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe vulnerability \"Unsecured HTTP Server Detected: Switch to 'http.ListenAndServeTLS'\" refers to the use of an unsecured HTTP server in a Python application. This can expose the application to various security risks such as man-in-the-middle attacks, eavesdropping, and data tampering. The vulnerability sink in this case is the `http.ListenAndServe` function, which starts an HTTP server without any form of encryption.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to switch to the `http.ListenAndServeTLS` function, which starts an HTTPS server instead. HTTPS is a secure version of HTTP, it encrypts all communication between the server and the client, thus preventing the aforementioned security risks.\n\n## Source Code Fix Recommendation\n\nHere is a code snippet that demonstrates how to switch to `http.ListenAndServeTLS`:\n\n```python\nimport http.server\nimport ssl\n\nhttpd = http.server.HTTPServer(('localhost', 4443), http.server.SimpleHTTPRequestHandler)\nhttpd.socket = ssl.wrap_socket(httpd.socket, \n                               keyfile=\"path/to/key.pem\", \n                               certfile='path/to/cert.pem', \n                               server_side=True)\nhttpd.serve_forever()\n```\n\nIn this code, `ssl.wrap_socket` is used to wrap the HTTP server socket in an SSL context. The `keyfile` and `certfile` parameters should point to your SSL key and certificate files respectively.\n\n## Library Dependencies\n\nThe code example requires the following Python standard libraries:\n\n- `http.server`\n- `ssl`\n\n## OWASP and CWE Links\n\n- [OWASP Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-319: Cleartext Transmission of Sensitive Information](https://cwe.mitre.org/data/definitions/319.html)"
+              },
+              "properties": {
+                "tags": [
+                  "go.lang.security.audit.net.use-tls.use-tls"
+                ]
+              }
+            },
+            {
+              "id": "glog-8eee566c-2b6f-49ff-8bff-163039c82d91",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe vulnerability \"Potential Logic Bug: 'err' Variable Assigned from Multiple Sources\" refers to a situation where a variable, in this case 'err', is assigned from multiple sources. This can lead to confusion and unexpected behavior, as the value of 'err' can be overwritten by subsequent assignments, potentially causing the loss of important error information.\n\nIn the provided code, the 'err' variable is first assigned a value when attempting to unmarshal a JSON payload. If an error occurs during this process, the 'err' variable will hold the error information. However, later in the code, 'err' is assigned a new value when writing a response. If an error occurs during this process, the original error information will be lost.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to use separate error variables for different operations. This ensures that error information from one operation is not lost when another operation fails.\n\n## Source Code Fix Recommendation\n\nHere is a recommended fix for the provided code:\n\n```python\nunmarshalErr := json.Unmarshal(payload, &p)\nif unmarshalErr != nil {\n\treturn fmt.Errorf(\"error unmarshaling JSON: %w\", unmarshalErr)\n}\n\n# ... rest of the code ...\n\nresponseErr := response.Write(conn)\nif responseErr != nil {\n\t# handle error\n}\n```\n\nIn this fix, separate error variables 'unmarshalErr' and 'responseErr' are used for the unmarshaling and response writing operations, respectively.\n\n## Library Dependencies\n\nThe provided code appears to be written in Go, not Python, and requires the following libraries:\n\n- `fmt`\n- `log`\n- `net/http`\n- `io`\n- `bytes`\n- `strings`\n\n## OWASP and CWE Links\n\n- [OWASP Error Handling](https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html)\n- [CWE-691: Insufficient Control Flow Management](https://cwe.mitre.org/data/definitions/691.html)\n\nPlease note that the links provided are subject to change and may not be accessible in the future."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.handler-assignment-from-multiple-sources"
+                ]
+              }
+            },
+            {
+              "id": "glog-da746c5e-3169-4fc9-a92a-d6cb81294ca3",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nUnintentional Pointer Sharing in Loop Iterations Vulnerability in Python refers to a situation where a pointer, instead of the actual value, is shared across loop iterations. This can lead to unexpected behavior and potential security vulnerabilities as the same memory location is being referenced in each iteration, and any changes made to the pointer will reflect in all iterations.\n\nIn the provided code snippet, there is no such vulnerability as it is written in Go, not Python. The code is iterating over a slice of severities and for each severity, it is updating a metric with the host and severity as labels. There is no pointer sharing happening in this loop.\n\n## Mitigation Advice\n\nTo avoid unintentional pointer sharing in Python, you should ensure that you are working with the actual values and not the references. This can be achieved by creating new instances or copying the values instead of reusing the same instance or reference.\n\n## Source Code Fix Recommendation\n\nAs mentioned, the provided code snippet is not vulnerable to this issue. However, if it were in Python and had this vulnerability, a fix could look like this:\n\n```python\nfor severity in severities:\n    metrics.EventCountMetric.WithLabelValues(host, severity).Add(0)\n```\n\n## Library Dependencies\n\nThe provided code snippet seems to be using the Prometheus client library for Go. The specific package being used is `prometheus`.\n\n## References\n\n- [CWE-567: Unsynchronized Access to Shared Data in a Multithreaded Context](https://cwe.mitre.org/data/definitions/567.html)\n\nPlease note that there is no direct CWE for Unintentional Pointer Sharing in Loop Iterations Vulnerability as it is more of a language-specific issue rather than a common weakness. The closest CWE is CWE-567 which talks about unsynchronized access to shared data in a multithreaded context."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.exported_loop_pointer"
+                ]
+              }
+            },
+            {
+              "id": "glog-6e06f6a2-3b8c-43cc-9ed7-2eeeaf572054",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"` in Python's `re.compile` function is vulnerable to a potential catastrophic backtracking vulnerability. This vulnerability can lead to Denial of Service (DoS) attacks. \n\nCatastrophic backtracking occurs when a regular expression engine enters a state of excessive backtracking due to inefficiently structured regex patterns. This can cause the regex engine to consume an excessive amount of computational resources, leading to a DoS condition.\n\nIn the case of the regex `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"`, an attacker can craft a string that causes the regex engine to backtrack excessively, consuming a large amount of CPU and memory resources, and potentially causing the application to hang or crash.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using quantifiers on both sides of a regex pattern that can match the same character. Instead, use non-greedy quantifiers or atomic grouping to prevent excessive backtracking.\n\n## Source Code Fix Recommendation\n\nHere is a safer version of the regex pattern:\n\n```python\nimport re\n\n# Safer regex pattern\npattern = r\"^\\d+?\\.\\d+?\\.\\d+?\\.\\d+?$\"\nregex = re.compile(pattern)\n```\n\nIn this version, the `+` quantifier is replaced with `+?` to make it non-greedy, which prevents the regex engine from backtracking excessively.\n\n## Library Dependencies\n\nThe code example requires the built-in `re` module in Python. No additional library dependencies are needed.\n\n## References\n\n- [OWASP Regex Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-41001b7b-9715-4db3-ad0e-93b413b9f1f4",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe \"Shared Loop Pointer Export Vulnerability\" in Python is a common programming pitfall which is not due to a language defect, but rather a coding error. This vulnerability occurs when the address of a loop iterator variable is shared across multiple goroutines. This can lead to unexpected behavior as the value of the variable may be updated by a different goroutine in the next loop iteration.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid sharing the address of the loop iterator variable across multiple goroutines. Instead, you should pass the actual value of the variable to the goroutine.\n\n## Source Code Fix Recommendation\n\nHere is a fixed version of the provided code:\n\n```go\nfor _, node := range temp.GetNodes() {\n    nodeName := *node.Name\n    nodes = append(nodes, nodeName)\n}\n```\n\nIn this fixed version, we create a new variable `nodeName` inside the loop to hold the value of `*node.Name`. This way, the value is not shared across multiple goroutines.\n\n## Library Dependencies\n\nThe code example is written in Go, not Python. It does not explicitly import any libraries, but it implicitly depends on the following Go packages:\n\n- `fmt`: for formatted I/O.\n- `net/http`: for HTTP client and server implementations.\n\n## OWASP and CWE Links\n\n- [CWE-567: Unsynchronized Access to Shared Data in a Multithreaded Context](https://cwe.mitre.org/data/definitions/567.html)\n\nPlease note that the links provided are active and accessible to anonymous users at the time of writing this report."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.exported_loop_pointer"
+                ]
+              }
+            },
+            {
+              "id": "glog-bcecfc52-0ecc-4989-85c2-914c13c6f3fb",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe \"Disabled Certificate Verification Vulnerability\" in Python is a security flaw that occurs when a programmer disables or fails to implement SSL/TLS certificate verification when making a request to a remote server using the `requests.get` function. This can lead to Man-in-the-Middle (MitM) attacks, where an attacker can intercept and potentially alter the data being transmitted.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, developers should never disable certificate verification in a production environment. The `requests.get` function should always be used with SSL/TLS certificate verification enabled. This can be done by not setting `verify` parameter to `False`.\n\n## Source Code Fix Recommendation\n\nHere is an example of a vulnerable code:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=False)\n```\n\nThe recommended fix is to remove the `verify=False` argument or set it to `True`:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=True)\n```\n\n## Library Dependencies\n\nThe code example requires the following library to be installed:\n\n- requests\n\nYou can install it using pip:\n\n```bash\npip install requests\n```\n\n## References\n\n- [OWASP - Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "python.requests.security.disabled-cert-validation.disabled-cert-validation"
+                ]
+              }
+            },
+            {
+              "id": "glog-2ef9fe97-d308-48f7-bcbb-e0e233606d77",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe 'urllib3' Python module is a powerful, user-friendly HTTP client for Python. However, it can be vulnerable to insecure network request warnings if these warnings are disabled. This can lead to potential security risks such as Man-in-the-Middle (MitM) attacks, where an attacker intercepts and potentially alters the communication between two parties without their knowledge.\n\nThis vulnerability is typically introduced when developers intentionally disable warnings in order to suppress the noise in their logs or console output. However, this can lead to serious security implications as it may hide potential security threats.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, developers should avoid disabling warnings globally. Instead, they should handle warnings appropriately and ensure that they are logged and reviewed regularly. This will help to identify potential security threats early and take appropriate action.\n\nIn addition, developers should ensure that their applications always use secure connections (HTTPS) and validate SSL certificates. This will help to prevent MitM attacks.\n\n## Source Code Fix Recommendation\n\nInstead of disabling warnings globally, handle them appropriately. Here is an example of how to do this:\n\n```python\nimport urllib3\nfrom urllib3.exceptions import InsecureRequestWarning\n\n# Create a PoolManager instance\nhttp = urllib3.PoolManager()\n\n# Disable warnings for a specific instance\nhttp.urllib3.disable_warnings(category=InsecureRequestWarning)\n\n# Now you can make insecure requests without being warned\nresponse = http.request('GET', 'http://example.com')\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies:\n\n- urllib3\n\n## References\n\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.insecure-urllib3-warnings-use"
+                ]
+              }
+            },
+            {
+              "id": "glog-b5c61024-a0db-4867-8703-4b551ddafc7f",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\n\"Unencrypted HTTP Request Detected, Use HTTPS Instead\" is a vulnerability that occurs when sensitive data is transmitted over an unencrypted HTTP connection. This can expose the data to potential interception, manipulation, or theft. In Python, this vulnerability can occur when using the `requests` library to send HTTP requests without using HTTPS.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, always use HTTPS when sending sensitive data. HTTPS encrypts the data between the client and the server, making it much more difficult for an attacker to intercept or manipulate the data. \n\nIn Python, you can use the `requests` library to send HTTPS requests. You can also use the `http.client` library, which supports HTTPS.\n\n## Source Code Fix Recommendation\n\nHere is a code fix that uses HTTPS instead of HTTP:\n\n```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.packages.urllib3.util.retry import Retry\n\nsession = requests.Session()\nretry = Retry(total=5, backoff_factor=0.1, status_forcelist=[ 500, 502, 503, 504 ])\nadapter = HTTPAdapter(max_retries=retry)\nsession.mount('https://', adapter)\nresponse = session.get('https://example.com')\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies:\n\n- `requests`\n\n## OWASP Resources\n\n- [OWASP Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n\n## Common Weakness Enumeration (CWE)\n\n- [CWE-319: Cleartext Transmission of Sensitive Information](https://cwe.mitre.org/data/definitions/319.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.request-session-with-http"
+                ]
+              }
+            },
+            {
+              "id": "glog-ec4c96ec-2883-4bed-b2c4-3b8da35425c3",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-e03bd39c-f721-4066-8ba0-7aab3a43b1a0",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-be5db5ea-2b33-4054-a7c6-89224dbd63ad",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-fd86e1ff-a57a-465a-a6cf-fe3b8fa02974",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-21cec00a-0e25-4b23-8864-86fb56ae6813",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-183f1014-d07d-4f3a-8a7a-ffc93af651fe",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r'Tasks/([^\"]+)'` in Python is vulnerable to a potential catastrophic backtracking vulnerability. This vulnerability can lead to Denial of Service (DoS) attacks. The issue arises when the regular expression engine is forced into situations where it has to backtrack excessively. This can happen when the regex pattern contains nested quantifiers that can match the same input in multiple ways. In such cases, the regex engine may end up trying all possible combinations, leading to a significant increase in CPU usage and potentially causing the application to hang or crash.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using nested quantifiers in your regular expressions. Instead, use non-greedy quantifiers and be as specific as possible with your regex patterns. Also, consider setting timeouts for regex operations to prevent them from running indefinitely.\n\n## Source Code Fix Recommendation\n\nInstead of using `r'Tasks/([^\"]+)'`, you can use `r'Tasks/([^\"]*?)'`. This changes the `+` quantifier to `*?`, making it non-greedy and preventing the regex engine from backtracking excessively.\n\n```python\nimport re\n\n# Vulnerable code\n# match = re.search(r'Tasks/([^\"]+)', response.text)\n\n# Recommended fix\nmatch = re.search(r'Tasks/([^\"]*?)', response.text)\n```\n\n## Library Dependencies\n\nThe code example requires the following Python standard library:\n\n- `re` - This module provides support for regular expressions in Python.\n\n## References\n\n- [OWASP Regular expression Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are accessible to anonymous users at the time of writing this report."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-03ac0e02-f1d3-4ff4-add9-8964b1539ba3",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-f2ee6565-ea2e-4dac-aeab-3c1e34cc7c37",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\"` in Python's `re.compile` function is vulnerable to a potential catastrophic backtracking issue. Catastrophic backtracking occurs when a regular expression pattern contains quantifiers that can match the same input in multiple ways. This can lead to a significant increase in the time taken to process certain strings, potentially leading to a Denial of Service (DoS) attack if an attacker can control the input to the regular expression.\n\nIn this specific case, the regular expression is designed to match a string that consists of four two-digit numbers separated by periods. However, the use of the `\\d\\d` pattern can lead to multiple possible matches for the same input, leading to catastrophic backtracking.\n\n## Mitigation Advice\n\nTo mitigate this issue, you should avoid using regular expressions that can lead to catastrophic backtracking. This can be achieved by making your regular expressions more specific, or by using non-backtracking groups where possible.\n\n## Source Code Fix Recommendation\n\nIn this case, the regular expression can be rewritten to avoid the potential for catastrophic backtracking. Here's an example of how you might do this:\n\n```python\nimport re\n\n# Original vulnerable regex\n# regex = re.compile(r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\")\n\n# Fixed regex\nregex = re.compile(r\"^(?:\\d{2}\\.){3}\\d{2}$\")\n```\n\nIn the fixed version, `(?:\\d{2}\\.){3}` is a non-backtracking group that matches a two-digit number followed by a period, exactly three times. This is then followed by another two-digit number. This version of the regular expression is not vulnerable to catastrophic backtracking.\n\n## Library Dependencies\n\nThe only library dependency required by this code example is the built-in `re` module in Python.\n\n## References\n\n- [OWASP: Regular expression Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-07e9f3e5-87ee-42ec-a7e5-545be757cafa",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-97e12a61-9860-4843-b192-89b3d4655f0f",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe 'urllib3' Python module is a powerful, user-friendly HTTP client for Python. However, it can be vulnerable to insecure network request warnings if these warnings are disabled. This can lead to potential security risks such as Man-in-the-Middle (MitM) attacks, where an attacker intercepts and potentially alters the communication between two parties without their knowledge.\n\nThis vulnerability is typically introduced when developers intentionally disable warnings in order to suppress the noise in their logs or console output. However, this can lead to serious security implications as it may hide potential security threats.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, developers should avoid disabling warnings globally. Instead, they should handle warnings appropriately and ensure that they are logged and reviewed regularly. This will help to identify potential security threats early and take appropriate action.\n\nIn addition, developers should ensure that their applications always use secure connections (HTTPS) and validate SSL certificates. This will help to prevent MitM attacks.\n\n## Source Code Fix Recommendation\n\nInstead of disabling warnings globally, handle them appropriately. Here is an example of how to do this:\n\n```python\nimport urllib3\nfrom urllib3.exceptions import InsecureRequestWarning\n\n# Create a PoolManager instance\nhttp = urllib3.PoolManager()\n\n# Disable warnings for a specific instance\nhttp.urllib3.disable_warnings(category=InsecureRequestWarning)\n\n# Now you can make insecure requests without being warned\nresponse = http.request('GET', 'http://example.com')\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies:\n\n- urllib3\n\n## References\n\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.insecure-urllib3-warnings-use"
+                ]
+              }
+            },
+            {
+              "id": "glog-199add07-4990-420a-a36f-655c21a9eaf6",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"` in Python's `re.compile` function is vulnerable to a potential catastrophic backtracking vulnerability. This vulnerability can lead to Denial of Service (DoS) attacks. \n\nCatastrophic backtracking occurs when a regular expression engine enters a state of excessive backtracking due to inefficiently structured regex patterns. This can cause the regex engine to consume an excessive amount of computational resources, leading to a DoS condition.\n\nIn the case of the regex `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"`, an attacker can craft a string that causes the regex engine to backtrack excessively, consuming a large amount of CPU and memory resources, and potentially causing the application to hang or crash.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using quantifiers on both sides of a regex pattern that can match the same character. Instead, use non-greedy quantifiers or atomic grouping to prevent excessive backtracking.\n\n## Source Code Fix Recommendation\n\nHere is a safer version of the regex pattern:\n\n```python\nimport re\n\n# Safer regex pattern\npattern = r\"^\\d+?\\.\\d+?\\.\\d+?\\.\\d+?$\"\nregex = re.compile(pattern)\n```\n\nIn this version, the `+` quantifier is replaced with `+?` to make it non-greedy, which prevents the regex engine from backtracking excessively.\n\n## Library Dependencies\n\nThe code example requires the built-in `re` module in Python. No additional library dependencies are needed.\n\n## References\n\n- [OWASP Regex Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-57e625e6-3086-451a-8e6a-da1a67772fbe",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-4d1b824c-47e2-4887-84c3-d3da0801f768",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe \"Disabled Certificate Verification Vulnerability\" in Python is a security flaw that occurs when a programmer disables or fails to implement SSL/TLS certificate verification when making a request to a remote server using the `requests.get` function. This can lead to Man-in-the-Middle (MitM) attacks, where an attacker can intercept and potentially alter the data being transmitted.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, developers should never disable certificate verification in a production environment. The `requests.get` function should always be used with SSL/TLS certificate verification enabled. This can be done by not setting `verify` parameter to `False`.\n\n## Source Code Fix Recommendation\n\nHere is an example of a vulnerable code:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=False)\n```\n\nThe recommended fix is to remove the `verify=False` argument or set it to `True`:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=True)\n```\n\n## Library Dependencies\n\nThe code example requires the following library to be installed:\n\n- requests\n\nYou can install it using pip:\n\n```bash\npip install requests\n```\n\n## References\n\n- [OWASP - Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "python.requests.security.disabled-cert-validation.disabled-cert-validation"
+                ]
+              }
+            },
+            {
+              "id": "glog-aa61c3ca-38f9-48c0-a944-6cb0157c0a4b",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-300796fb-b1b3-4b8b-87b2-0d7d6db8ddbb",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-eb9ce2ec-1721-4a34-99a2-339dfae393d0",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-5a1e6d2e-792e-4dc3-9d5c-cd992654f5ee",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-e7d5872d-d4fb-4b27-9952-535caa9d4583",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\n\"Unencrypted HTTP Request Detected, Use HTTPS Instead\" is a vulnerability that occurs when sensitive data is transmitted over an unencrypted HTTP connection. This can expose the data to potential interception, manipulation, or theft. In Python, this vulnerability can occur when using the `requests` library to send HTTP requests without using HTTPS.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, always use HTTPS when sending sensitive data. HTTPS encrypts the data between the client and the server, making it much more difficult for an attacker to intercept or manipulate the data. \n\nIn Python, you can use the `requests` library to send HTTPS requests. You can also use the `http.client` library, which supports HTTPS.\n\n## Source Code Fix Recommendation\n\nHere is a code fix that uses HTTPS instead of HTTP:\n\n```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.packages.urllib3.util.retry import Retry\n\nsession = requests.Session()\nretry = Retry(total=5, backoff_factor=0.1, status_forcelist=[ 500, 502, 503, 504 ])\nadapter = HTTPAdapter(max_retries=retry)\nsession.mount('https://', adapter)\nresponse = session.get('https://example.com')\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies:\n\n- `requests`\n\n## OWASP Resources\n\n- [OWASP Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n\n## Common Weakness Enumeration (CWE)\n\n- [CWE-319: Cleartext Transmission of Sensitive Information](https://cwe.mitre.org/data/definitions/319.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.request-session-with-http"
+                ]
+              }
+            },
+            {
+              "id": "glog-35d8331b-f209-4cfd-8715-47835ba0802d",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-f3a1a64f-cdf6-48d9-b997-f59331ba01dd",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-43a72f5a-c247-4db8-b0dd-53ee8b68ad88",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-37328e5c-9ef9-41ee-ac4a-6b5a6796f624",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-3a406ce7-1e13-4e01-8591-4ec663ccd467",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-6a6fc404-a0f6-450c-9e5c-8374af9d9675",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-1bfe258c-ed7a-41dd-9bd9-997bffa65324",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-52a28601-8268-42fa-81a3-322f8df4f3c6",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe 'urllib3' Python module is a powerful, user-friendly HTTP client for Python. However, it can be vulnerable to insecure network request warnings if these warnings are disabled. This can lead to potential security risks such as Man-in-the-Middle (MitM) attacks, where an attacker intercepts and potentially alters the communication between two parties without their knowledge.\n\nThis vulnerability is typically introduced when developers intentionally disable warnings in order to suppress the noise in their logs or console output. However, this can lead to serious security implications as it may hide potential security threats.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, developers should avoid disabling warnings globally. Instead, they should handle warnings appropriately and ensure that they are logged and reviewed regularly. This will help to identify potential security threats early and take appropriate action.\n\nIn addition, developers should ensure that their applications always use secure connections (HTTPS) and validate SSL certificates. This will help to prevent MitM attacks.\n\n## Source Code Fix Recommendation\n\nInstead of disabling warnings globally, handle them appropriately. Here is an example of how to do this:\n\n```python\nimport urllib3\nfrom urllib3.exceptions import InsecureRequestWarning\n\n# Create a PoolManager instance\nhttp = urllib3.PoolManager()\n\n# Disable warnings for a specific instance\nhttp.urllib3.disable_warnings(category=InsecureRequestWarning)\n\n# Now you can make insecure requests without being warned\nresponse = http.request('GET', 'http://example.com')\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies:\n\n- urllib3\n\n## References\n\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.insecure-urllib3-warnings-use"
+                ]
+              }
+            },
+            {
+              "id": "glog-36d679e4-e108-4719-a1e2-034cbb2e566b",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r'Tasks/([^\"]+)'` in Python is vulnerable to a potential catastrophic backtracking vulnerability. This vulnerability can lead to Denial of Service (DoS) attacks. The issue arises when the regular expression engine is forced into situations where it has to backtrack excessively. This can happen when the regex pattern contains nested quantifiers that can match the same input in multiple ways. In such cases, the regex engine may end up trying all possible combinations, leading to a significant increase in CPU usage and potentially causing the application to hang or crash.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using nested quantifiers in your regular expressions. Instead, use non-greedy quantifiers and be as specific as possible with your regex patterns. Also, consider setting timeouts for regex operations to prevent them from running indefinitely.\n\n## Source Code Fix Recommendation\n\nInstead of using `r'Tasks/([^\"]+)'`, you can use `r'Tasks/([^\"]*?)'`. This changes the `+` quantifier to `*?`, making it non-greedy and preventing the regex engine from backtracking excessively.\n\n```python\nimport re\n\n# Vulnerable code\n# match = re.search(r'Tasks/([^\"]+)', response.text)\n\n# Recommended fix\nmatch = re.search(r'Tasks/([^\"]*?)', response.text)\n```\n\n## Library Dependencies\n\nThe code example requires the following Python standard library:\n\n- `re` - This module provides support for regular expressions in Python.\n\n## References\n\n- [OWASP Regular expression Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are accessible to anonymous users at the time of writing this report."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-2bf6d764-8f53-4788-bd57-3bb8b0d8c94f",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\"` in Python's `re.compile` function is vulnerable to a potential catastrophic backtracking issue. Catastrophic backtracking occurs when a regular expression pattern contains quantifiers that can match the same input in multiple ways. This can lead to a significant increase in the time taken to process certain strings, potentially leading to a Denial of Service (DoS) attack if an attacker can control the input to the regular expression.\n\nIn this specific case, the regular expression is designed to match a string that consists of four two-digit numbers separated by periods. However, the use of the `\\d\\d` pattern can lead to multiple possible matches for the same input, leading to catastrophic backtracking.\n\n## Mitigation Advice\n\nTo mitigate this issue, you should avoid using regular expressions that can lead to catastrophic backtracking. This can be achieved by making your regular expressions more specific, or by using non-backtracking groups where possible.\n\n## Source Code Fix Recommendation\n\nIn this case, the regular expression can be rewritten to avoid the potential for catastrophic backtracking. Here's an example of how you might do this:\n\n```python\nimport re\n\n# Original vulnerable regex\n# regex = re.compile(r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\")\n\n# Fixed regex\nregex = re.compile(r\"^(?:\\d{2}\\.){3}\\d{2}$\")\n```\n\nIn the fixed version, `(?:\\d{2}\\.){3}` is a non-backtracking group that matches a two-digit number followed by a period, exactly three times. This is then followed by another two-digit number. This version of the regular expression is not vulnerable to catastrophic backtracking.\n\n## Library Dependencies\n\nThe only library dependency required by this code example is the built-in `re` module in Python.\n\n## References\n\n- [OWASP: Regular expression Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-602323d6-e9be-4eac-bc37-b41e89ba3192",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"` in Python's `re.compile` function is vulnerable to a potential catastrophic backtracking vulnerability. This vulnerability can lead to Denial of Service (DoS) attacks. \n\nCatastrophic backtracking occurs when a regular expression engine enters a state of excessive backtracking due to inefficiently structured regex patterns. This can cause the regex engine to consume an excessive amount of computational resources, leading to a DoS condition.\n\nIn the case of the regex `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"`, an attacker can craft a string that causes the regex engine to backtrack excessively, consuming a large amount of CPU and memory resources, and potentially causing the application to hang or crash.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using quantifiers on both sides of a regex pattern that can match the same character. Instead, use non-greedy quantifiers or atomic grouping to prevent excessive backtracking.\n\n## Source Code Fix Recommendation\n\nHere is a safer version of the regex pattern:\n\n```python\nimport re\n\n# Safer regex pattern\npattern = r\"^\\d+?\\.\\d+?\\.\\d+?\\.\\d+?$\"\nregex = re.compile(pattern)\n```\n\nIn this version, the `+` quantifier is replaced with `+?` to make it non-greedy, which prevents the regex engine from backtracking excessively.\n\n## Library Dependencies\n\nThe code example requires the built-in `re` module in Python. No additional library dependencies are needed.\n\n## References\n\n- [OWASP Regex Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            },
+            {
+              "id": "glog-3dfe9392-fbf3-47d9-9001-2637b9d7bea3",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\n\"Unencrypted HTTP Request Detected, Use HTTPS Instead\" is a vulnerability that occurs when sensitive data is transmitted over an unencrypted HTTP connection. This can expose the data to potential interception, manipulation, or theft. In Python, this vulnerability can occur when using the `requests` library to send HTTP requests without using HTTPS.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, always use HTTPS when sending sensitive data. HTTPS encrypts the data between the client and the server, making it much more difficult for an attacker to intercept or manipulate the data. \n\nIn Python, you can use the `requests` library to send HTTPS requests. You can also use the `http.client` library, which supports HTTPS.\n\n## Source Code Fix Recommendation\n\nHere is a code fix that uses HTTPS instead of HTTP:\n\n```python\nimport requests\nfrom requests.adapters import HTTPAdapter\nfrom requests.packages.urllib3.util.retry import Retry\n\nsession = requests.Session()\nretry = Retry(total=5, backoff_factor=0.1, status_forcelist=[ 500, 502, 503, 504 ])\nadapter = HTTPAdapter(max_retries=retry)\nsession.mount('https://', adapter)\nresponse = session.get('https://example.com')\n```\n\n## Library Dependencies\n\nThe code example requires the following library dependencies:\n\n- `requests`\n\n## OWASP Resources\n\n- [OWASP Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n\n## Common Weakness Enumeration (CWE)\n\n- [CWE-319: Cleartext Transmission of Sensitive Information](https://cwe.mitre.org/data/definitions/319.html)"
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.request-session-with-http"
+                ]
+              }
+            },
+            {
+              "id": "glog-5769f72d-2d77-428c-a4ce-0dfa0e4bdc32",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe \"Disabled Certificate Verification Vulnerability\" in Python is a security flaw that occurs when a programmer disables or fails to implement SSL/TLS certificate verification when making a request to a remote server using the `requests.get` function. This can lead to Man-in-the-Middle (MitM) attacks, where an attacker can intercept and potentially alter the data being transmitted.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, developers should never disable certificate verification in a production environment. The `requests.get` function should always be used with SSL/TLS certificate verification enabled. This can be done by not setting `verify` parameter to `False`.\n\n## Source Code Fix Recommendation\n\nHere is an example of a vulnerable code:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=False)\n```\n\nThe recommended fix is to remove the `verify=False` argument or set it to `True`:\n\n```python\nimport requests\n\nresponse = requests.get('https://example.com', verify=True)\n```\n\n## Library Dependencies\n\nThe code example requires the following library to be installed:\n\n- requests\n\nYou can install it using pip:\n\n```bash\npip install requests\n```\n\n## References\n\n- [OWASP - Transport Layer Protection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html)\n- [CWE-295: Improper Certificate Validation](https://cwe.mitre.org/data/definitions/295.html)"
+              },
+              "properties": {
+                "tags": [
+                  "python.requests.security.disabled-cert-validation.disabled-cert-validation"
+                ]
+              }
+            },
+            {
+              "id": "glog-4a2b5f2d-9d7e-479f-af05-f0ecc432a07e",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-fea00ff9-a9e8-4bfe-95bd-ef8f80626c03",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-d4ebe4d8-3294-4c48-848a-88d053d5e2fb",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe `time.sleep()` function in Python is used to delay the execution of the next line of code for a specified amount of time. An unintended `time.sleep()` function call vulnerability occurs when an attacker is able to manipulate the input to the `time.sleep()` function, causing the application to pause for an extended period of time. This can lead to Denial of Service (DoS) attacks, where the application becomes unresponsive or its performance is significantly degraded.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, it is recommended to avoid using user-supplied input directly in the `time.sleep()` function. If a delay is necessary, consider using a fixed value that cannot be manipulated by an attacker. Also, consider implementing input validation and sanitization to ensure that only valid inputs are processed by your application.\n\n## Source Code Fix Recommendation\n\nIf you have a piece of code like this:\n\n```python\nimport time\n\ndef delay(seconds):\n    time.sleep(seconds)\n```\n\nYou should avoid using user-supplied input directly. Instead, use a fixed value:\n\n```python\nimport time\n\ndef delay():\n    time.sleep(5)  # fixed value\n```\n\n## Library Dependencies\n\nThe `time` module is a built-in module in Python, so no additional library dependencies are required.\n\n## References\n\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are valid and active at the time of writing."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.arbitrary-sleep"
+                ]
+              }
+            },
+            {
+              "id": "glog-b9e29f6f-3050-4aca-9daa-a0f3e2a5ea69",
+              "help": {
+                "text": "",
+                "markdown": "## Description\n\nThe regular expression `r'Tasks/([^\"]+)'` in Python is vulnerable to a potential catastrophic backtracking vulnerability. This vulnerability can lead to Denial of Service (DoS) attacks. The issue arises when the regular expression engine is forced into situations where it has to backtrack excessively. This can happen when the regex pattern contains nested quantifiers that can match the same input in multiple ways. In such cases, the regex engine may end up trying all possible combinations, leading to a significant increase in CPU usage and potentially causing the application to hang or crash.\n\n## Mitigation Advice\n\nTo mitigate this vulnerability, you should avoid using nested quantifiers in your regular expressions. Instead, use non-greedy quantifiers and be as specific as possible with your regex patterns. Also, consider setting timeouts for regex operations to prevent them from running indefinitely.\n\n## Source Code Fix Recommendation\n\nInstead of using `r'Tasks/([^\"]+)'`, you can use `r'Tasks/([^\"]*?)'`. This changes the `+` quantifier to `*?`, making it non-greedy and preventing the regex engine from backtracking excessively.\n\n```python\nimport re\n\n# Vulnerable code\n# match = re.search(r'Tasks/([^\"]+)', response.text)\n\n# Recommended fix\nmatch = re.search(r'Tasks/([^\"]*?)', response.text)\n```\n\n## Library Dependencies\n\nThe code example requires the following Python standard library:\n\n- `re` - This module provides support for regular expressions in Python.\n\n## References\n\n- [OWASP Regular expression Denial of Service - ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS)\n- [CWE-400: Uncontrolled Resource Consumption](https://cwe.mitre.org/data/definitions/400.html)\n\nPlease note that the links provided are accessible to anonymous users at the time of writing this report."
+              },
+              "properties": {
+                "tags": [
+                  "resources.rules.dlint-catastrophic-redos"
+                ]
+              }
+            }
+          ],
+          "language": "en-US",
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "isComprehensive": false
+        }
+      },
+      "language": "en-US",
+      "results": [
+        {
+          "ruleId": "glog-ae4e1e82-0265-4677-909c-d59753fe22a9",
+          "kind": "fail",
+          "level": "error",
+          "message": {
+            "text": "\"Disabling SSL Certificate Checks Vulnerability\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py"
+                },
+                "region": {
+                  "startLine": 222,
+                  "startColumn": 20,
+                  "endLine": 223,
+                  "endColumn": 10,
+                  "snippet": {
+                    "text": "        response = requests.get(\n"
+                  }
+                },
+                "contextRegion": {
+                  "startLine": 222,
+                  "endLine": 226,
+                  "snippet": {
+                    "text": "        response = requests.get(\n            url, auth=(bmc_username, bmc_password), verify=False, timeout=10\n        )\n        response.raise_for_status()\n        data = response.json()\n"
+                  }
+                }
+              }
+            }
+          ],
+          "properties": {
+            "issue_severity": "HIGH",
+            "issue_confidence": "HIGH"
+          }
+        },
+        {
+          "ruleId": "glog-d6c27adc-cbea-4b96-a6e8-2c54705394b6",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "The title can be rephrased as: \"Missing `MinVersion` in TLS Configuration, Defaulting to Lower TLS Version\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/listener.go",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 118,
+                  "startColumn": 13,
+                  "endLine": 118,
+                  "endColumn": 62,
+                  "snippet": {
+                    "text": "\tconfig := &tls.Config{Certificates: []tls.Certificate{cert}}"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "fd5bc252cf70cb4707409aac9f5f631bef6bb2e4be24e549a455de73f43d7d768c6f76aa96662be641fe92949b7ee79d3060c67676a5abc922bd779830c036e3_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-849e2898-aea0-490a-91af-2f7025478f3f",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Need for Explicit Version Tagging in Image Creation for Deterministic Container Images\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/Dockerfile",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 13,
+                  "snippet": {
+                    "text": "FROM busybox"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "260df0f00e05d1c78c2f4b1d269d04f70e5ebd2ca528bae91bb8ca03395b68e040869457c9043b4552318a1d3f80ff657ce7895488896a21d44fa3bd47d17a58_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-10424096-33e9-4a69-a374-40f8e1e01e72",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Securing Containers in Kubernetes to Prevent Privilege Escalation Attacks\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/k8s/exporter.yaml",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 5,
+                  "endLine": 14,
+                  "endColumn": 9,
+                  "snippet": {
+                    "text": "    spec:"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "f73c0acc8175ea1d07d3f858bec6e6341bb9624761c8a1e0263adabcb4ff0357959cea5c442f78543efbf73e2f249f03e2a29d05eb63986fe36aaf08f7d9d335_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-e9eca8e7-2e84-4590-84bb-6c17282de002",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Securing Containers in Kubernetes to Prevent Privilege Escalation Attacks\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/dev/redfish-mock/redfish-mock.yaml",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 14,
+                  "startColumn": 5,
+                  "endLine": 14,
+                  "endColumn": 9,
+                  "snippet": {
+                    "text": "    spec:"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "ff7831bc2928c6988996abbf50c61021d78c751cd2eb4fe16ce7b36a0c0ef0c41a4d32551284c44fc9d008fda2d0eca9fcd25c5819257406c58e52d9d022010e_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-b8f9066b-6a46-4fca-b4cd-df21112862ca",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unsecured HTTP Server Detected: Switch to 'http.ListenAndServeTLS'"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/main.go",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 94,
+                  "startColumn": 13,
+                  "endLine": 94,
+                  "endColumn": 50,
+                  "snippet": {
+                    "text": "\t\tif err := http.ListenAndServe(\":\"+portStr, nil); err != nil && err != http.ErrServerClosed {"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "455e0cf1ca0ae9bd4f589262fefdef0fad27873668bcfd7bf83c78879de79279e9b7d8d0f1dd360057426cb300d9310d16fa8ebb39fec68c0e405c025fdfb6b7_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-8eee566c-2b6f-49ff-8bff-163039c82d91",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Potential Logic Bug: 'err' Variable Assigned from Multiple Sources"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/listener.go",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 194,
+                  "startColumn": 2,
+                  "endLine": 257,
+                  "endColumn": 28,
+                  "snippet": {
+                    "text": "\terr = json.Unmarshal(payload, &p)\n\tif err != nil {\n\t\treturn fmt.Errorf(\"error unmarshaling JSON: %w\", err)\n\t}\n\n\t// Log the extracted information\n\tvar eventType string\n\tvar severity string\n\tlog.Printf(\"Method: %s\", method)\n\tlog.Printf(\"Headers: %v\", headers)\n\tfor _, event := range p.Events {\n\t\teventType = event.EventType\n\t\teventId := event.EventId\n\t\tseverity = event.Severity\n\t\tmessage := event.Message\n\t\tmessageId := event.MessageId\n\t\tmessageArgs := event.MessageArgs\n\t\toriginOfCondition := event.OriginOfCondition.OdataId\n\n\t\tlog.Printf(\"Event Type: %s\", eventType)\n\t\tlog.Printf(\"Event ID: %s\", eventId)\n\t\tlog.Printf(\"Severity: %s\", severity)\n\t\tlog.Printf(\"Message: %s\", message)\n\t\tlog.Printf(\"Message ID: %s\", messageId)\n\t\tlog.Printf(\"Message Args: %v\", messageArgs)\n\t\tlog.Printf(\"Origin Of Condition: %s\", originOfCondition)\n\t\tfor _, triggerEvent := range AppConfig.TriggerEvents {\n\t\t\tif severity == triggerEvent.Severity {\n\t\t\t\tlog.Printf(\"Matched Trigger Event: %s with action %s\", triggerEvent.Severity, triggerEvent.Action)\n\t\t\t\t// Sending event belongs to redfish_utils. Each server may have different slurm node associated, and redfish_servers has the info/map.\n\t\t\t\tif s.slurmQueue != nil {\n\t\t\t\t\tredfishServerInfo := getServerInfoByIP(AppConfig.RedfishServers, ip)\n\t\t\t\t\tif len(strings.TrimSpace(redfishServerInfo.SlurmNode)) == 0 {\n\t\t\t\t\t\tlog.Printf(\"failed to get the slurm node name, cannot perform action: %v\", triggerEvent.Action)\n\t\t\t\t\t\tbreak\n\t\t\t\t\t}\n\t\t\t\t\ts.slurmQueue.Add(redfishServerInfo.IP, redfishServerInfo.SlurmNode, triggerEvent.Severity, triggerEvent.Action)\n\t\t\t\t}\n\t\t\t\tbreak\n\t\t\t}\n\t\t}\n\t}\n\n\t// Append data to dataBuffer and increment eventCount\n\t*dataBuffer = append(*dataBuffer, payload...)\n\t*eventCount++\n\n\t// Update metrics using variables from metrics.go\n\tmetrics.EventCountMetric.WithLabelValues(ip, severity).Inc()\n\tmetrics.EventProcessingTimeMetric.WithLabelValues(ip, severity).SetToCurrentTime()\n\n\t// Send a 200 OK response\n\tresponse := &http.Response{\n\t\tStatus:        \"200 OK\",\n\t\tStatusCode:    http.StatusOK,\n\t\tProto:         req.Proto,\n\t\tProtoMajor:    req.ProtoMajor,\n\t\tProtoMinor:    req.ProtoMinor,\n\t\tHeader:        make(http.Header),\n\t\tBody:          io.NopCloser(bytes.NewBufferString(\"OK\")),\n\t\tContentLength: int64(len(\"OK\")),\n\t}\n\tresponse.Header.Set(\"Content-Type\", \"text/plain\")\n\terr = response.Write(conn)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "303444107c839ec6c7611d96351be79671613096310bafbd23c44144ebcbb7b4f98ae4a68c8ab60cb325bf7e6c9bedf7cb7ecd32a9a5d8703fe9b46af88bbfaf_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-da746c5e-3169-4fc9-a92a-d6cb81294ca3",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintentional Pointer Sharing in Loop Iterations Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/main.go",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 129,
+                  "startColumn": 3,
+                  "endLine": 131,
+                  "endColumn": 4,
+                  "snippet": {
+                    "text": "\t\tfor _, severity := range severities {\n\t\t\tmetrics.EventCountMetric.WithLabelValues(host, severity).Add(0)\n\t\t}"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "b5163096d1605c8609151b509a839aa5d348a93c8fe27a8820a46f8cce2d718de5da89bab374d86796ad2e5d6ed398096fbdbfafb7e70facc41fc478c09e201f_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-6e06f6a2-3b8c-43cc-9ed7-2eeeaf572054",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Potential for Catastrophic Backtracking Vulnerability in Regex `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"` Leading to Denial of Service Attacks"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 113,
+                  "startColumn": 18,
+                  "endLine": 113,
+                  "endColumn": 53,
+                  "snippet": {
+                    "text": "    ip_pattern = re.compile(r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\")  # Simple IPv4 check"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "4441441050e5395659583f6805e4ba917603c5b5799d015076d4209c282af4be9ebeb3b66bc85d739e670eb5a883cc7f91d33f0754b67324aec9a4f679e4e70e_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-41001b7b-9715-4db3-ad0e-93b413b9f1f4",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Shared Loop Pointer Export Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "redfish-exporter/slurm/slurm.go",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 157,
+                  "startColumn": 2,
+                  "endLine": 159,
+                  "endColumn": 3,
+                  "snippet": {
+                    "text": "\tfor _, node := range temp.GetNodes() {\n\t\tnodes = append(nodes, *node.Name)\n\t}"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "5797c93ba976f5cec1c608f7a512c037a201a2140e697247b44a8bc32f5b6ea383b238ca6b8e65fbed773825a7294139fac6c8a87ad251e8f311714f968266c1_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-bcecfc52-0ecc-4989-85c2-914c13c6f3fb",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Disabled Certificate Verification Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 216,
+                  "startColumn": 20,
+                  "endLine": 218,
+                  "endColumn": 10,
+                  "snippet": {
+                    "text": "        response = requests.get(\n            url, auth=(bmc_username, bmc_password), verify=False, timeout=10\n        )"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "08d3ce299366a628a71d09218337205de88781b32014a20ca8914c15f31a5a2fe297015dcae5642ef71ce5e3fc42cf0915ab92f2bceba967acf5cb269a57fd7d_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-2ef9fe97-d308-48f7-bcbb-e0e233606d77",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "'urllib3' Python Module Insecure Network Request Warnings Disabled"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 1,
+                  "endLine": 24,
+                  "endColumn": 68,
+                  "snippet": {
+                    "text": "urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "562ed6cbfd3a45f06e7885a3ceacba31e1038f0ed93d2d1983791efb5909f07a5af13ca10d7543c81233a32157a1700368c550c6c745e4603951dadc8d9da792_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-b5c61024-a0db-4867-8703-4b551ddafc7f",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unencrypted HTTP Request Detected, Use HTTPS Instead"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 142,
+                  "startColumn": 5,
+                  "endLine": 142,
+                  "endColumn": 63,
+                  "snippet": {
+                    "text": "    session.mount(\"http://\", HTTPAdapter(max_retries=retries))"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "4e46cc33f28faf43ef006aad2d9ad074580334a00b2ac7c088335d8751b604707cdf53dd0fb4695abee5c30d4da1cd50b5a6d89a0659a36faa6ab29aa86c0135_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-ec4c96ec-2883-4bed-b2c4-3b8da35425c3",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 504,
+                  "startColumn": 5,
+                  "endLine": 504,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "    time.sleep(dwell)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "89f841b78f0d5f1e2139724a174a3e495c61c744c0c23f3ab5173fcb8dc94681e9a0cc3849206910eab76c4f840862325411b0fae51b3f33e4d71383210c2a41_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-e03bd39c-f721-4066-8ba0-7aab3a43b1a0",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 534,
+                  "startColumn": 9,
+                  "endLine": 534,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "        time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "3ef0968105ba02f5a2e35aed1f783541b4f1cc9d06235d95c884f3f68b1ca8af18593458dfc3aa432c1dbac32d109cae53c4d419f1b145460720231ff8bd6ae1_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-be5db5ea-2b33-4054-a7c6-89224dbd63ad",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 563,
+                  "startColumn": 5,
+                  "endLine": 563,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "    time.sleep(dwell)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "89f841b78f0d5f1e2139724a174a3e495c61c744c0c23f3ab5173fcb8dc94681e9a0cc3849206910eab76c4f840862325411b0fae51b3f33e4d71383210c2a41_1"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-fd86e1ff-a57a-465a-a6cf-fe3b8fa02974",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 638,
+                  "startColumn": 9,
+                  "endLine": 638,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "        time.sleep(3)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "2a49e440591b2331092b1086ee35e51392c8d96027f51089d18c7c7840cae9896742ffdfaab3f7a34355434b2c19c2142ae63179b4e5207e5d6215685378db67_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-21cec00a-0e25-4b23-8864-86fb56ae6813",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 608,
+                  "startColumn": 9,
+                  "endLine": 608,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "        time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "3ef0968105ba02f5a2e35aed1f783541b4f1cc9d06235d95c884f3f68b1ca8af18593458dfc3aa432c1dbac32d109cae53c4d419f1b145460720231ff8bd6ae1_1"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-183f1014-d07d-4f3a-8a7a-ffc93af651fe",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Potential Catastrophic Backtracking Vulnerability in Regex `r'Tasks/([^\"]+)'` Could Lead to Denial of Service Attacks\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 666,
+                  "startColumn": 13,
+                  "endLine": 666,
+                  "endColumn": 55,
+                  "snippet": {
+                    "text": "    match = re.search(r'Tasks/([^\"]+)', response.text)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "45ccff3d20a3570345c99177003ab7e0828a74a8c933c635ffe7ac14859c885713a4e03975f0b0651451aa31b192af2fdca42507e460a32b94d10d72a9a9ff04_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-03ac0e02-f1d3-4ff4-add9-8964b1539ba3",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 922,
+                  "startColumn": 17,
+                  "endLine": 922,
+                  "endColumn": 37,
+                  "snippet": {
+                    "text": "                time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "3ef0968105ba02f5a2e35aed1f783541b4f1cc9d06235d95c884f3f68b1ca8af18593458dfc3aa432c1dbac32d109cae53c4d419f1b145460720231ff8bd6ae1_2"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-f2ee6565-ea2e-4dac-aeab-3c1e34cc7c37",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Potential for Catastrophic Backtracking Vulnerability in Regex `r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\"` Leading to Denial of Service Attacks"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 788,
+                  "startColumn": 19,
+                  "endLine": 788,
+                  "endColumn": 58,
+                  "snippet": {
+                    "text": "    bkc_pattern = re.compile(r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\")"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "c60a42f79894b3b561b8e6b09e75045113a4789edceb6262520e1d7c9ce22637fa8f8483381a7e47d9ff67acda36a388fc46b0ce4c18c2b5b1a1cafe54d09eab_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-07e9f3e5-87ee-42ec-a7e5-545be757cafa",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 957,
+                  "startColumn": 13,
+                  "endLine": 957,
+                  "endColumn": 33,
+                  "snippet": {
+                    "text": "            time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "3ef0968105ba02f5a2e35aed1f783541b4f1cc9d06235d95c884f3f68b1ca8af18593458dfc3aa432c1dbac32d109cae53c4d419f1b145460720231ff8bd6ae1_4"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-97e12a61-9860-4843-b192-89b3d4655f0f",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "'urllib3' Python Module Insecure Network Request Warnings Disabled"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 1,
+                  "endLine": 24,
+                  "endColumn": 68,
+                  "snippet": {
+                    "text": "urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "25c84d8de63c062bce6c08de1d0496a70284f99a83d636c9b5660f225f1186f22a2dedaa885ab56e103312b8d3d0c37362543989c0d08d792b64081d1635eb87_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-199add07-4990-420a-a36f-655c21a9eaf6",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Potential for Catastrophic Backtracking Vulnerability in Regex `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"` Leading to Denial of Service Attacks"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 119,
+                  "startColumn": 18,
+                  "endLine": 119,
+                  "endColumn": 53,
+                  "snippet": {
+                    "text": "    ip_pattern = re.compile(r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\")  # Simple IPv4 check"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "a9d43ecaeb616e32759d45b265a9b404a0184f46d26c9217bc24357afc2e05c76a8dc740f1d3c263c0d494e1a9c90911f8e9f11e55e4b772946b68779edbb488_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-57e625e6-3086-451a-8e6a-da1a67772fbe",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 837,
+                  "startColumn": 9,
+                  "endLine": 837,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "        time.sleep(interval)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "bf98bd7f619dd6bc9bc5b26c2fd24d36327198d3c49ecbcf33b16879a4653b7fd8de1a7a66cba663740baf4115b6328589fbc7635263de050b0896be15039452_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-4d1b824c-47e2-4887-84c3-d3da0801f768",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Disabled Certificate Verification Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 222,
+                  "startColumn": 20,
+                  "endLine": 224,
+                  "endColumn": 10,
+                  "snippet": {
+                    "text": "        response = requests.get(\n            url, auth=(bmc_username, bmc_password), verify=False, timeout=10\n        )"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "2c4e75de360d2444e9340340396a347ac898018649d6a9767448f9ba9ecfd504ded04ecb4a8cdc9d382470ae9b23794759585c7c59bfaf9aed672fa45ce6ed66_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-aa61c3ca-38f9-48c0-a944-6cb0157c0a4b",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 510,
+                  "startColumn": 5,
+                  "endLine": 510,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "    time.sleep(dwell)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "99058d76240f84048cd16d258596400216cd0d1a35881fa0fc1205fa3527f95ed8115db3a14d2cc02f4118c8e1d427e904e6d1fc744bc9c630fc5b1e63955f3f_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-300796fb-b1b3-4b8b-87b2-0d7d6db8ddbb",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 540,
+                  "startColumn": 9,
+                  "endLine": 540,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "        time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "11abcea04d69b888668b31bcfe1ec4c8600393654f2dc3d50e263f56e7f9bb4bb9e2b8704337bf04965b61884eac39a1d114617c4d31f9efbc15ba1af9481edc_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-eb9ce2ec-1721-4a34-99a2-339dfae393d0",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 857,
+                  "startColumn": 5,
+                  "endLine": 857,
+                  "endColumn": 18,
+                  "snippet": {
+                    "text": "    time.sleep(5)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "713d135725431290ef2b073c2b69901e442a4f9b9f9a1179e027c517662ca70ce50e737ad45ba04a2e637aed9d7a9382e1c4c692c8260eef45e3ee1247c7fe97_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-5a1e6d2e-792e-4dc3-9d5c-cd992654f5ee",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_alllogs_collection.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 931,
+                  "startColumn": 17,
+                  "endLine": 931,
+                  "endColumn": 37,
+                  "snippet": {
+                    "text": "                time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "3ef0968105ba02f5a2e35aed1f783541b4f1cc9d06235d95c884f3f68b1ca8af18593458dfc3aa432c1dbac32d109cae53c4d419f1b145460720231ff8bd6ae1_3"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-e7d5872d-d4fb-4b27-9952-535caa9d4583",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unencrypted HTTP Request Detected, Use HTTPS Instead"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 148,
+                  "startColumn": 5,
+                  "endLine": 148,
+                  "endColumn": 63,
+                  "snippet": {
+                    "text": "    session.mount(\"http://\", HTTPAdapter(max_retries=retries))"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "b8dd92246fa8161cc318d09d067a169411f2b7045239618118d4f526f723324c134a22bf7dde2f1e18e8984bcdd07912a3593741c67455f81ec7cd96a9c61550_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-35d8331b-f209-4cfd-8715-47835ba0802d",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 644,
+                  "startColumn": 9,
+                  "endLine": 644,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "        time.sleep(3)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "b1708b73b667a74bf460883e0ca77295931f64502942ec930d54f400ee5a8d6f9c8369e76ccdaa16db29da64dfeb7c1495a38fb7078b612d78a6f2ceb7f5222d_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-f3a1a64f-cdf6-48d9-b997-f59331ba01dd",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 569,
+                  "startColumn": 5,
+                  "endLine": 569,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "    time.sleep(dwell)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "99058d76240f84048cd16d258596400216cd0d1a35881fa0fc1205fa3527f95ed8115db3a14d2cc02f4118c8e1d427e904e6d1fc744bc9c630fc5b1e63955f3f_1"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-43a72f5a-c247-4db8-b0dd-53ee8b68ad88",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 614,
+                  "startColumn": 9,
+                  "endLine": 614,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "        time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "11abcea04d69b888668b31bcfe1ec4c8600393654f2dc3d50e263f56e7f9bb4bb9e2b8704337bf04965b61884eac39a1d114617c4d31f9efbc15ba1af9481edc_1"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-37328e5c-9ef9-41ee-ac4a-6b5a6796f624",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 843,
+                  "startColumn": 9,
+                  "endLine": 843,
+                  "endColumn": 29,
+                  "snippet": {
+                    "text": "        time.sleep(interval)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "afa6c0fe726a7dbc490ecfecfc3b8a2d4ca3f360ae1007c6444a0fd7228d4a16e851fa9d96675a368baa6732f3d0f5554e7fe4c98a015d264335cef10f3cc9c5_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-3a406ce7-1e13-4e01-8591-4ec663ccd467",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 863,
+                  "startColumn": 5,
+                  "endLine": 863,
+                  "endColumn": 18,
+                  "snippet": {
+                    "text": "    time.sleep(5)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "d73f1bb6c8cc72a4998f3230db0bc2fca6eb897ea3594d3891617588c4ba251fb1f9438cf755f6deeafb60cff7a5a8f44b99d35123af128e02c68d0188d899e8_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-6a6fc404-a0f6-450c-9e5c-8374af9d9675",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 928,
+                  "startColumn": 17,
+                  "endLine": 928,
+                  "endColumn": 37,
+                  "snippet": {
+                    "text": "                time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "11abcea04d69b888668b31bcfe1ec4c8600393654f2dc3d50e263f56e7f9bb4bb9e2b8704337bf04965b61884eac39a1d114617c4d31f9efbc15ba1af9481edc_2"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-1bfe258c-ed7a-41dd-9bd9-997bffa65324",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 937,
+                  "startColumn": 17,
+                  "endLine": 937,
+                  "endColumn": 37,
+                  "snippet": {
+                    "text": "                time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "11abcea04d69b888668b31bcfe1ec4c8600393654f2dc3d50e263f56e7f9bb4bb9e2b8704337bf04965b61884eac39a1d114617c4d31f9efbc15ba1af9481edc_3"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-52a28601-8268-42fa-81a3-322f8df4f3c6",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "'urllib3' Python Module Insecure Network Request Warnings Disabled"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 24,
+                  "startColumn": 1,
+                  "endLine": 24,
+                  "endColumn": 68,
+                  "snippet": {
+                    "text": "urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "7b2803cdc71af18a5100726e235de6dc1cda44731fbe8571a53657b68afdf06a930caf743e1c09e39bdbcf66f215f716602bb1a72ea871a82f5e5b0ce5909211_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-36d679e4-e108-4719-a1e2-034cbb2e566b",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Potential Catastrophic Backtracking Vulnerability in Regex `r'Tasks/([^\"]+)'` Could Lead to Denial of Service Attacks\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 672,
+                  "startColumn": 13,
+                  "endLine": 672,
+                  "endColumn": 55,
+                  "snippet": {
+                    "text": "    match = re.search(r'Tasks/([^\"]+)', response.text)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "7bd4d8f806bb1c8c78d25c953f57f7ee9cb3bf16f626621fafb5042b1c388da024081a6a4b8c56d16dbe97d1ab919392d149d85454a78bc5bc0531b921cab97b_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-2bf6d764-8f53-4788-bd57-3bb8b0d8c94f",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Potential for Catastrophic Backtracking Vulnerability in Regex `r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\"` Leading to Denial of Service Attacks"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 794,
+                  "startColumn": 19,
+                  "endLine": 794,
+                  "endColumn": 58,
+                  "snippet": {
+                    "text": "    bkc_pattern = re.compile(r\"^\\d\\d\\.\\d\\d\\.\\d\\d\\.\\d\\d$\")"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "1940756f8e2eae95af5f70075e7fd67e40fd91b7a53d32fc4cabc7972beef87fb94e55b3b81749e8263dc848eb9b1ded920729a15fe1773fc12a31eced717015_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-602323d6-e9be-4eac-bc37-b41e89ba3192",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Potential for Catastrophic Backtracking Vulnerability in Regex `r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\"` Leading to Denial of Service Attacks"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 115,
+                  "startColumn": 18,
+                  "endLine": 115,
+                  "endColumn": 53,
+                  "snippet": {
+                    "text": "    ip_pattern = re.compile(r\"^\\d+\\.\\d+\\.\\d+\\.\\d+$\")  # Simple IPv4 check"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "8d90aebb7e004905c4b02ac5d145a75a9092655e7a6f84d3f67fbe42d9a8b40d2aabc0bc50413325fb6faa84219ae16ffc1eaa452226eaf2a5322672144590b7_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-3dfe9392-fbf3-47d9-9001-2637b9d7bea3",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unencrypted HTTP Request Detected, Use HTTPS Instead"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 144,
+                  "startColumn": 5,
+                  "endLine": 144,
+                  "endColumn": 63,
+                  "snippet": {
+                    "text": "    session.mount(\"http://\", HTTPAdapter(max_retries=retries))"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "94bff158535dc8618c66c4418e0cc4cb20b6bcab76f5f8286434b20642a815f94ffbe374232dfb983fefd980f632ee54c25fd3214a6f3c33171a3ee25b6817c0_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-5769f72d-2d77-428c-a4ce-0dfa0e4bdc32",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Disabled Certificate Verification Vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 218,
+                  "startColumn": 20,
+                  "endLine": 220,
+                  "endColumn": 10,
+                  "snippet": {
+                    "text": "        response = requests.get(\n            url, auth=(bmc_username, bmc_password), verify=False, timeout=10\n        )"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "8d4588b97d72f7e3dc8e6c66570f6876b447dfb2a91565eceba0eb66a2d49f6d845a169025357d27e03e7b265b3757e7565a6cc63443fed9067f1f660c28b194_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-4a2b5f2d-9d7e-479f-af05-f0ecc432a07e",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_bkc_update.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 963,
+                  "startColumn": 13,
+                  "endLine": 963,
+                  "endColumn": 33,
+                  "snippet": {
+                    "text": "            time.sleep(INTERVAL)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "11abcea04d69b888668b31bcfe1ec4c8600393654f2dc3d50e263f56e7f9bb4bb9e2b8704337bf04965b61884eac39a1d114617c4d31f9efbc15ba1af9481edc_4"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-fea00ff9-a9e8-4bfe-95bd-ef8f80626c03",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 565,
+                  "startColumn": 5,
+                  "endLine": 565,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "    time.sleep(dwell)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "e4da6c047c6544f528b20153ca17e58ca7278b1186856f423c2269f4b6f5ade6ce9ff4a51fd5028131548c62a2f5d7c7f6aa7b59af7e53d8e4b94167b7f01ee1_1"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-d4ebe4d8-3294-4c48-848a-88d053d5e2fb",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "Unintended time.sleep() function call vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 640,
+                  "startColumn": 9,
+                  "endLine": 640,
+                  "endColumn": 22,
+                  "snippet": {
+                    "text": "        time.sleep(3)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "237c8e898ee007b56778fa0db775e4a8bf830524178e9a4ac786212562bb1a66b200ed58cf4911d57e2a1eb1d9a3c633ff63d850b62507a6eae73f092af91894_0"
+          },
+          "properties": {}
+        },
+        {
+          "ruleId": "glog-b9e29f6f-3050-4aca-9daa-a0f3e2a5ea69",
+          "kind": "fail",
+          "level": "warning",
+          "message": {
+            "text": "\"Potential Catastrophic Backtracking Vulnerability in Regex `r'Tasks/([^\"]+)'` Could Lead to Denial of Service Attacks\""
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "smci_instinct_platform_amdgpu_clear_all_logs.py",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 668,
+                  "startColumn": 13,
+                  "endLine": 668,
+                  "endColumn": 55,
+                  "snippet": {
+                    "text": "    match = re.search(r'Tasks/([^\"]+)', response.text)"
+                  }
+                }
+              }
+            }
+          ],
+          "fingerprints": {
+            "matchBasedId/v1": "bf2bf353869e750a3b05b0ec313978a76741a9874bb8c10a48c2677e1a60e90199e84c628b752018bc597e9e52e468a00517ee2c56cf4ec62eac3ecd4e080a36_0"
+          },
+          "properties": {}
+        }
+      ],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ]
+    }
+  ]
+}
